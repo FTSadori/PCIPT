@@ -6,15 +6,8 @@ using System.Threading.Tasks;
 
 namespace PCIPT.Calculations.FirstStage.LossByVehicle
 {
-    public sealed class LossByVehicle
+    public sealed record CostByVehicle(string Name, float HydraulicOilConsumption, float TransmissionOilConsumption, float SpecialOilConsumption, float BaseElectricityConsumption, float MotorOilConsumption, float FuelConsumption)
     {
-        public string Name = "";
-        public float HydraulicOilConsumption;
-        public float TransmissionOilConsumption;
-        public float SpecialOilConsumption;
-        public float BaseElectricityConsumption;
-        public float FuelConsumption;
-        public float MotorOilConsumption;
         public float TotalLoss { get 
             { 
                 return HydraulicOilConsumption + TransmissionOilConsumption + SpecialOilConsumption + BaseElectricityConsumption + FuelConsumption + MotorOilConsumption; 
