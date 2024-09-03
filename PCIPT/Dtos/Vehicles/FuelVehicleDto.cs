@@ -8,7 +8,7 @@ namespace PCIPT.Dtos.Vehicles
 {
     public sealed record FuelVehicleDto
         (string Name, string Type, float LoadCapacity, float SpeedWithLoad, float SpeedWithoutLoad, float LoadTime,
-        float HydraulicOilConsumption, float TransmissionOilConsumption, float SpecialOilConsumption,
+        float HydraulicOilConsumption, float TransmissionOilConsumption, float SpecialOilConsumption, int MaxQuantity,
         string FuelType, float FuelConsumption, float MotorOilConsumption)
-        : VehicleDto(Name, Type, LoadCapacity, SpeedWithLoad, SpeedWithoutLoad, LoadTime, HydraulicOilConsumption, TransmissionOilConsumption, SpecialOilConsumption);
+        : VehicleDto(Name, Type, LoadCapacity, SpeedWithLoad, SpeedWithoutLoad, LoadTime, HydraulicOilConsumption, TransmissionOilConsumption, SpecialOilConsumption, MaxQuantity);
 }

@@ -8,6 +8,6 @@ namespace PCIPT.Dtos.Vehicles
 {
     public record VehicleDto
         (string Name, string Type, float LoadCapacity, float SpeedWithLoad, float SpeedWithoutLoad, float LoadTime, 
-        float HydraulicOilConsumption, float TransmissionOilConsumption, float SpecialOilConsumption)
+        float HydraulicOilConsumption, float TransmissionOilConsumption, float SpecialOilConsumption, int MaxQuantity)
         : IData;
 }

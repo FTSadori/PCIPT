@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace PCIPT.Dtos.VehicleTypes
 {
-    public sealed record VehicleTypeDto(string TypeName, List<string> AvaliableCargoTypes) : IData;
+    public sealed record VehicleTypeDto(string VehicleType, string CargoType) : IData;
 }

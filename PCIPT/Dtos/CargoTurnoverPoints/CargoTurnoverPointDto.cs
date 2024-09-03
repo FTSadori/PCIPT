@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace PCIPT.Dtos.CargoTurnoverPoints
 {
-    public sealed record CargoTurnoverPointDto(string PointName, float OutgoingCargo, int CargoCode) : IData;
+    public sealed record CargoTurnoverPointDto(string SourceName, string DestinationName, float OutgoingCargo, int CargoCode) : IData;
 }
