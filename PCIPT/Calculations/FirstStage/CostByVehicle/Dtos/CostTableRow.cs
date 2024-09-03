@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PCIPT.Calculations.FirstStage.CostByVehicle
+namespace PCIPT.Calculations.FirstStage.CostByVehicle.Dtos
 {
     public sealed record CostTableRow(string Name, float[] Costs, string FuelType);
 }

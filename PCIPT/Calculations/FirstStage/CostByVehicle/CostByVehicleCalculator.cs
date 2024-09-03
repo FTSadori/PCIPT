@@ -1,7 +1,8 @@
 ﻿using CsvHelper.Configuration.Attributes;
-using PCIPT.Calculations.FirstStage.CostByVehicle;
+using PCIPT.Calculations.FirstStage.CostByVehicle.Dtos;
 using PCIPT.Dtos.CostWeight;
 using PCIPT.Dtos.Vehicles;
+using PCIPT.Calculations.FirstStage.CostByVehicle;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
@@ -59,9 +60,9 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
             return new CostTableRow(dto.Name, costs, fuelType);
         }
 
-        private static CostByVehicle ConvertTableRowToRecord(CostTableRow tableRow)
+        private static CostTableRowEntity ConvertTableRowToRecord(CostTableRow tableRow)
         {
-            return new CostByVehicle(tableRow.Name,
+            return new CostTableRowEntity(tableRow.Name,
                 tableRow.Costs[(int)CostType.HydraulicOilConsumption],
                 tableRow.Costs[(int)CostType.TransmissionOilConsumption],
                 tableRow.Costs[(int)CostType.SpecialOilConsumption],
@@ -70,7 +71,7 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
                 tableRow.Costs[(int)CostType.FuelConsumption]);
         }
 
-        public static List<CostByVehicle> CalculateCostsByVehicles(List<VehicleDto> vehicleDtos, List<CostWeightDto> costWeightDtos)
+        public static List<CostTableRowEntity> CalculateCostsByVehicles(List<VehicleDto> vehicleDtos, List<CostWeightDto> costWeightDtos)
         {
             // Створюємо порожній масив максимальних витрат в кожному стовпцю
             float[] maxCosts = new float[(int)CostType.MaxCostTypes];
@@ -118,7 +119,7 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
             }
 
             // Перетворюємо дані у форму для виводу
-            var costByVehicles = new List<CostByVehicle>();
+            var costByVehicles = new List<CostTableRowEntity>();
             foreach (var costRow in costTable)
             {
                 costByVehicles.Add(ConvertTableRowToRecord(costRow));
