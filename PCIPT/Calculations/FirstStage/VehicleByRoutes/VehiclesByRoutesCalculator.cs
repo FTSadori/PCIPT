@@ -46,10 +46,8 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
             return vehicleInRoutes;
         }
 
-        record BusyVehicleData(int Number, float RemainsTime);
-
         public static List<VehicleByRoutesRow> DistributeTasksByVehicles(
-            Dictionary<RouteFilesData, List<VehicleInRouteStats>> vrstats, 
+            Dictionary<RouteFilesData, List<VehicleInRouteStats>> vrstats,
             List<VehicleDto> vehicles,
             List<CargoTurnoverPointDto> points
             )
@@ -100,51 +98,67 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                     }
                 }
 
-                Dictionary<string, List<BusyVehicleData>> newCurrentVehicles = new();
-                foreach (var vehicle in vehicles) newCurrentVehicles.Add(vehicle.Name, new());
-
-                int left = 0;
-                float eachTimeFraction = totalTimeFraction / usedInRoute.Count;
-                foreach (var vrrow in usedInRoute)
-                {
-                    int number;
-                    float spent;
-                    if (currentVehicles[vrrow.Name].Count == 0)
-                    {
-                        currentNumber[vrrow.Name] += 1;
-                        number = currentNumber[vrrow.Name];
-                        spent = eachTimeFraction;
-                        newCurrentVehicles[vrrow.Name].Add(new BusyVehicleData(currentNumber[vrrow.Name], 1f - eachTimeFraction));
-                    }
-                    else
-                    {
-                        var save = currentVehicles[vrrow.Name].First();
-                        number = save.Number;
-                        if (save.RemainsTime > eachTimeFraction)
-                        {
-                            spent = eachTimeFraction;
-                            newCurrentVehicles[vrrow.Name].Add(new BusyVehicleData(save.Number, save.RemainsTime - eachTimeFraction));
-                        }
-                        else
-                        {
-                            spent = save.RemainsTime;
-                            totalTimeFraction -= save.RemainsTime;
-                            left += 1;
-                            eachTimeFraction = totalTimeFraction / (usedInRoute.Count - left);
-                        }
-                        currentVehicles[vrrow.Name].Remove(save);
-                    }
-
-                    var tnoc = (int)Math.Ceiling(vrrow.NumberOfTransportCyclesPerDay * spent);
-
-                    distributionTable.Add(new VehicleByRoutesRow(
-                            vrrow.Name, number, route.Id, spent, vrstat.Key.Distance, route.CargoCode,
-                            vrrow.TransportCycleSize, tnoc, vrrow.TransportCycleSize * tnoc));
-                }
-                currentVehicles = newCurrentVehicles;
+                currentVehicles = SimulationStep(vehicles, usedInRoute, currentVehicles, distributionTable, currentNumber, route, vrstat, totalTimeFraction);
             }
 
             return distributionTable;
         }
+
+        private static Dictionary<string, List<BusyVehicleData>> SimulationStep(
+            List<VehicleDto> vehicles,
+            List<VehicleInRouteStats> usedInRoute,
+            Dictionary<string, List<BusyVehicleData>> currentVehicles,
+            List<VehicleByRoutesRow> distributionTable,
+            Dictionary<string, int> currentNumber,
+            CargoTurnoverPointDto route,
+            KeyValuePair<RouteFilesData, List<VehicleInRouteStats>> vrstat,
+            float totalTimeFraction
+            )
+        {
+            Dictionary<string, List<BusyVehicleData>> newCurrentVehicles = new();
+            foreach (var vehicle in vehicles) newCurrentVehicles.Add(vehicle.Name, new());
+
+            int left = 0;
+            float eachTimeFraction = totalTimeFraction / usedInRoute.Count;
+            foreach (var vrrow in usedInRoute)
+            {
+                int number;
+                float spent;
+                if (currentVehicles[vrrow.Name].Count == 0)
+                {
+                    currentNumber[vrrow.Name] += 1;
+                    number = currentNumber[vrrow.Name];
+                    spent = eachTimeFraction;
+                    newCurrentVehicles[vrrow.Name].Add(new BusyVehicleData(currentNumber[vrrow.Name], 1f - eachTimeFraction));
+                }
+                else
+                {
+                    var save = currentVehicles[vrrow.Name].First();
+                    number = save.Number;
+                    if (save.RemainsTime > eachTimeFraction)
+                    {
+                        spent = eachTimeFraction;
+                        newCurrentVehicles[vrrow.Name].Add(new BusyVehicleData(save.Number, save.RemainsTime - eachTimeFraction));
+                    }
+                    else
+                    {
+                        spent = save.RemainsTime;
+                        totalTimeFraction -= save.RemainsTime;
+                        left += 1;
+                        eachTimeFraction = totalTimeFraction / (usedInRoute.Count - left);
+                    }
+                    currentVehicles[vrrow.Name].Remove(save);
+                }
+
+                var tnoc = (int)Math.Ceiling(vrrow.NumberOfTransportCyclesPerDay * spent);
+
+                distributionTable.Add(new VehicleByRoutesRow(
+                        vrrow.Name, number, route.Id, spent, vrstat.Key.Distance, route.CargoCode,
+                        vrrow.TransportCycleSize, tnoc, vrrow.TransportCycleSize * tnoc));
+            }
+            return newCurrentVehicles;
+        }
+
+        record BusyVehicleData(int Number, float RemainsTime);
     }
 }
