@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace PCIPT.Dtos.Routes
 {
-    public sealed record RouteDto(int Id, string SourceName, string DestinationName, float Distance) : IData;
+    public sealed record RouteDto(int Id, int SourceId, int DestinationId, float Distance) : IData;
 }

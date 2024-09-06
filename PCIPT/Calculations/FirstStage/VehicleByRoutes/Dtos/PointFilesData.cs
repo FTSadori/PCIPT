@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos
 {
-    public record RouteFilesData(int PointId, string FileName, float Distance)
+    public record PointFilesData(int Id, string FileName, float Distance, int SourceId)
     {
         public override int GetHashCode()
         {
