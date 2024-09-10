@@ -33,7 +33,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
             Dictionary<PointFilesData, List<VehicleInRouteStats>> vehicleInRoutes = new();
             foreach (var point in points)
             {
-                float distance = RouteCalculator.GetDistanceBetween(routes, point.SourceId, point.DestinationId);
+                float distance = RouteCalculator.GetDistanceBetween(point.SourceId, point.DestinationId);
 
                 var cargo = cargoes.Find(c => c.Code == point.CargoCode);
                 if (distance == float.PositiveInfinity || cargo == null)
@@ -43,7 +43,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                     distance, DAILY_TIME_FUND, fullMass, WORKING_DAYS, MAX_DAILY_CARGO).OrderBy(o => o.TotalCost).ToList();
 
                 string filename = point.SourceId + "_" + point.DestinationId + "___" + cargo.Name + ".csv";
-                vehicleInRoutes[new PointFilesData(point.Id, filename, distance, point.SourceId)] = rn;
+                vehicleInRoutes[new PointFilesData(point.Id, filename, distance, point.SourceId, point.DestinationId)] = rn;
             }
             return vehicleInRoutes;
         }
@@ -79,17 +79,21 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                     int Creal = 0;
 
                     float v = vehicles.Find(v => v.Name == vrrow.Name)?.SpeedWithoutLoad ?? 0f;
+                    v = v * 1000f / 60f;
 
                     for (int i = 0; i < BusyVehicles[vrrow.Name].Count; ++i)
                     {
+                        // конкретний ТЗ
                         var entry = BusyVehicles[vrrow.Name][i];
-                        // рахуємо вільний час
-                        entry.Trc = RouteCalculator.GetDistanceBetween(routes, entry.IdPointCurrent, vrstat.Key.SourceId) / v;
-                        entry.Trs = RouteCalculator.GetDistanceBetween(routes, vrstat.Key.SourceId, entry.IdPointStart) / v;
+                        // рахуємо час переїзду
+                        entry.Trc = RouteCalculator.GetDistanceBetween(entry.IdPointCurrent, vrstat.Key.SourceId) / v;
+                        entry.Trs = RouteCalculator.GetDistanceBetween(vrstat.Key.DestinationId, entry.IdPointStart) / v;
                         if (entry.Trc == float.PositiveInfinity || entry.Trs == float.PositiveInfinity)
                             continue;
-
+                        
+                        // рахуємо вільний час
                         float tleft = dailyTimeFund - entry.UsedTime - entry.Trc - entry.Trs;
+                        // знаходимо цілу кількість циклів
                         int cycles = (int)MathF.Floor(tleft / vrrow.TransportCycleSize);
                         Creal += cycles;
                     }
@@ -100,37 +104,61 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                     // скільки використаємо насправді
                     int Cmin = Math.Min(Creal, Cneeds);
 
+                    // загальний витрачений час у ТЗ цієї моделі (враховуючи вже витрачений)
                     float Tau = 0f;
+                    // масив з номерами ТЗ, що потенційно можуть бути використаними
                     List<int> UsedFromBusy = new();
+                    // словник, що містить номер ТЗ та кількість циклів, що він проробив на цьому потоці
                     Dictionary<int, int> CyclesFromBusy = new();
+
+                    // переглядаємо всі вже використані ТЗ цієї моделі, але на інших ділянках,
+                    // може вони приїздять сюди та заберуть на себе частину циклів
                     for (int i = 0; i < BusyVehicles[vrrow.Name].Count; ++i)
                     {
+                        // змінна з ТЗ
                         var entry = BusyVehicles[vrrow.Name][i];
+
+                        // мінімальні потенційні витрати, що охоплюють всі поточні витрати
+                        // та витрати на переїзд сюди та потім на старт
                         float minPotentialTimeWaste = entry.UsedTime + entry.Trs + entry.Trc;
 
+                        // якщо у добовому фонді часу все ще є час для одного транспортного циклу, то...
                         if (dailyTimeFund - minPotentialTimeWaste - vrrow.TransportCycleSize >= 0f)
                         {
+                            // додаємо до сумарних початкових витрат
                             Tau += minPotentialTimeWaste;
+                            // вказуємо, що використовуємо ТЗ під номером i
                             UsedFromBusy.Add(i);
                             CyclesFromBusy.Add(i, 0);
                         }
                     }
                   
+                    // сортуємо обрану потенційну техніку за витраченим часом (чим більше, тим вище)
                     UsedFromBusy = UsedFromBusy.OrderByDescending(i => BusyVehicles[vrrow.Name][i].UsedTime).ToList();
 
-                    float Cr = Cmin;
+                    // відслідковуємо, скільки залишилось розподілити циклів
+                    int Cr = Cmin;
 
+                    // вимірюємо весь час (вже витрачений та той що має бути витраченим),
+                    // але у вигляді транспортних циклів
                     float Ctotal = Tau / vrrow.TransportCycleSize + Cmin;
+                    // скільки треба мінімум ТЗ, аби розподілити цикли (береться ціле)
                     int Ntotal = (int)MathF.Ceiling(Ctotal / vrrow.NumberOfTransportCyclesPerDay);
+                    // середня кількість циклів на кожне ТЗ
                     float CAverage = Ctotal / Ntotal;
+                    // середня кількість часу на кожне ТЗ
                     float TauAverage = CAverage * vrrow.TransportCycleSize;
 
+                    // оберемо ті номери ТЗ, що точно будуть використовуватись
                     List<int> NewUsedFromBusy = new();
                     foreach (var index in UsedFromBusy)
                     {
                         var entry = BusyVehicles[vrrow.Name][index];
+                        // якщо із часом на переїзд, виконання одного циклу та повернення...
+                        // ...вже сума більше за середнє, то ми виключаємо цю ТЗ
                         if (entry.UsedTime + entry.Trc + entry.Trs + vrrow.TransportCycleSize >= TauAverage)
                         {
+                            // перераховуємо характеристики без цієї ТЗ
                             Ctotal -= (entry.UsedTime + entry.Trc + entry.Trs) / vrrow.TransportCycleSize;
                             Ntotal = (int)MathF.Ceiling(Ctotal / vrrow.NumberOfTransportCyclesPerDay);
                             CAverage = Ctotal / Ntotal;
@@ -139,23 +167,27 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                             CyclesFromBusy.Remove(index);
                             continue;
                         }
+                        // якщо все ок, зберігаємо цю ТЗ
                         NewUsedFromBusy.Add(index);
 
+                        // визначаємо залишок часу
                         float tleft = TauAverage - (entry.UsedTime + entry.Trc + entry.Trs);
+                        // визначаємо цілу кількість циклів, та віддаємо їх цій ТЗ
                         int cleft = (int)MathF.Floor(tleft / vrrow.TransportCycleSize);
                         entry.UsedTime += vrrow.TransportCycleSize * cleft + entry.Trc;
                         CyclesFromBusy[index] += cleft;
                         Cr -= cleft;
                     }
-                    //distributionTable.Add(new VehicleByRoutesRow("NewUsedFromBusyCount", NewUsedFromBusy.Count, Ntotal, 0, 0, 0, 0, 0, 0));
-
+                    
+                    // додаємо нові порожні ТЗ
                     while (NewUsedFromBusy.Count < Ntotal)
                     {
+                        // рахуємо кількість циклів
                         float tleft = TauAverage;
                         int cleft = (int)MathF.Floor(tleft / vrrow.TransportCycleSize);
                         Cr -= cleft;
 
-                        BusyVehicles[vrrow.Name].Add(new(vrrow.TransportCycleSize * cleft, vrstat.Key.SourceId, vrstat.Key.SourceId, 0f, 0f));
+                        BusyVehicles[vrrow.Name].Add(new(vrrow.TransportCycleSize * cleft, vrstat.Key.DestinationId, vrstat.Key.SourceId, 0f, 0f));
                         NewUsedFromBusy.Add(BusyVehicles[vrrow.Name].Count - 1);
                         CyclesFromBusy.Add(BusyVehicles[vrrow.Name].Count - 1, cleft);
                     }
@@ -166,8 +198,10 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                         foreach (var index in NewUsedFromBusy)
                         {
                             var entry = BusyVehicles[vrrow.Name][index];
+                            // якщо вміщається
                             if (entry.UsedTime + entry.Trs + vrrow.TransportCycleSize <= dailyTimeFund)
                             {
+                                // додаємо один цикл
                                 entry.UsedTime += vrrow.TransportCycleSize;
                                 CyclesFromBusy[index] += 1;
                                 Cr -= 1;
@@ -191,8 +225,6 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
 
                     float workFractionDone = Cmin / MathF.Ceiling(vrrow.TotalNumberOfCycles);
                     remainsTimeFraction -= workFractionDone;
-
-                    //distributionTable.Add(new VehicleByRoutesRow("Point", 0, 0, 0, CyclesFromBusy.Count, Cmin, MathF.Ceiling(vrrow.TotalNumberOfCycles), workFractionDone, remainsTimeFraction));
 
                     if (remainsTimeFraction < 0.001f)
                         break;
