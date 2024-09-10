@@ -42,19 +42,19 @@ namespace PCIPT.Calculations.FirstStage.VehicleInRoute
 
                 float Tc1 = distance * 60f / (vehicle.SpeedWithLoad * 1000f) + distance * 60f / (vehicle.SpeedWithoutLoad * 1000f) + 2f * vehicle.LoadTime;
                 //float Tc2 = 2f * (distance * 60f / (vehicle.SpeedWithLoad * 1000f)) + 4f * vehicle.LoadTime;
-                float mdaily = MathF.Floor(dailyTimeFund / Tc1);
+                float cdaily = MathF.Floor(dailyTimeFund / Tc1);
                 float q = vehicle.LoadCapacity * cargo.CapacityUtilisationRate;
-                float qdaily = q * mdaily;
+                float qdaily = q * cdaily;
                 float N = Qdaily / qdaily;
 
                 float cost = costTable.Find(c => c.Name == vehicle.Name)?.TotalLoss ?? -1f;
                 if (cost < 0.0001f)
                     continue;
 
-                float mtotal = mdaily * N;
+                float mtotal = cdaily * N;
                 float ttotal = Tc1 * mtotal;
 
-                vehicleTable.Add(new VehicleInRouteStats(vehicle.Name, Tc1, mdaily, q, qdaily, N, N * cost, mtotal, ttotal));
+                vehicleTable.Add(new VehicleInRouteStats(vehicle.Name, Tc1, cdaily, q, qdaily, N, N * cost, mtotal, ttotal));
             }
 
             return vehicleTable;
