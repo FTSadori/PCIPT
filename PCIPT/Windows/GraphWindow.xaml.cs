@@ -1,6 +1,9 @@
-﻿using PCIPT.Core.DataHandler;
+﻿using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
+using PCIPT.Core.DataHandler;
 using PCIPT.Dtos.Node;
 using PCIPT.Dtos.Routes;
+using PCIPT.Windows.DataHandlers;
+using PCIPT.Windows.ObjectCreators;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,6 +27,8 @@ using System.Xml.Linq;
 
 namespace PCIPT.Windows
 {
+    public record NegSize(double Width, double Height);
+
     /// <summary>
     /// Логика взаимодействия для GraphWindow.xaml
     /// </summary>
@@ -35,6 +40,7 @@ namespace PCIPT.Windows
 
             Nodes = CsvHandler.GetAllFromFile<NodeDto>("Nodes.csv");
             Routes = CsvHandler.GetAllFromFile<RouteDto>("Routes.csv");
+            DistributedTasks = CsvHandler.GetAllFromFile<VehicleByRoutesRow>("DistributedTasks.csv");
         }
 
         public static void DoCmd(ThreadStart th)
@@ -42,18 +48,24 @@ namespace PCIPT.Windows
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, th);
         }
 
-        private record NegSize(double Width, double Height);
-
         private Dictionary<int, NegSize> nodesCoords = new();
-        private Dictionary<int, NegSize> nodesRealSize = new();
+        private List<GraphVehiclesData> vehiclesCoords = new();
+        private List<NegSize> realNodesSize = new();
 
         private readonly List<NodeDto> Nodes;
         private readonly List<RouteDto> Routes;
+        private readonly List<VehicleByRoutesRow> DistributedTasks;
 
         private double CurrentSize = 1;
         private bool Init = false;
         private double TotalShiftHeight = 0;
         private double TotalShiftWidth = 0;
+
+        private void InitEverything(List<NodeDto> nodes, List<VehicleByRoutesRow> distributedTasks)
+        {
+            InitCircleGraph(nodes);
+            InitVehicles(distributedTasks);
+        }
 
         private void InitCircleGraph(List<NodeDto> nodes)
         {
@@ -88,6 +100,15 @@ namespace PCIPT.Windows
                     line.X2 += Offset.Width;
                 }
             }
+
+            foreach (var child in VehiclesGraphCanvas.Children)
+            {
+                if (child is Ellipse ellipse)
+                {
+                    Canvas.SetLeft(ellipse, Canvas.GetLeft(ellipse) + Offset.Width);
+                    Canvas.SetBottom(ellipse, Canvas.GetBottom(ellipse) + Offset.Height);
+                }
+            }
         }
 
         private void AddToTotalOffset(NegSize Offset)
@@ -98,14 +119,13 @@ namespace PCIPT.Windows
 
         private void AutoNormalizeElementsOnGraph(double Size)
         {
-            int i = 0;
             foreach (var child in GraphCanvas.Children)
             {
                 if (child is Grid grid)
                 {
                     Canvas.SetLeft(grid, Canvas.GetLeft(grid) - grid.ActualWidth / 2);
                     Canvas.SetBottom(grid, Canvas.GetBottom(grid) - grid.ActualHeight / 2);
-                    nodesRealSize.Add(i++, new NegSize(grid.ActualWidth / 2 / Size, grid.ActualHeight / 2 / Size));
+                    realNodesSize.Add(new NegSize(grid.ActualWidth / 2 / Size, grid.ActualHeight / 2 / Size));
                     grid.Visibility = Visibility.Visible;
                 }
             }
@@ -118,11 +138,26 @@ namespace PCIPT.Windows
             {
                 if (child is Grid grid)
                 {
-                    Canvas.SetLeft(grid, Canvas.GetLeft(grid) - nodesRealSize[i].Width * Size);
-                    Canvas.SetBottom(grid, Canvas.GetBottom(grid) - nodesRealSize[i].Height * Size);
+                    Canvas.SetLeft(grid, Canvas.GetLeft(grid) - realNodesSize[i].Width * Size);
+                    Canvas.SetBottom(grid, Canvas.GetBottom(grid) - realNodesSize[i].Height * Size);
                     grid.Visibility = Visibility.Visible;
                     ++i;
                 }
+            }
+        }
+
+        private void InitVehicles(List<VehicleByRoutesRow> distributedTasks)
+        {
+            vehiclesCoords = GraphVehicleDataConverter.InitConvert(distributedTasks, nodesCoords);
+        }
+
+        private void RenderVehicles(double size)
+        {
+            VehiclesGraphCanvas.Children.Clear();
+
+            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size), size))
+            {
+                VehiclesGraphCanvas.Children.Add(child);
             }
         }
 
@@ -160,10 +195,11 @@ namespace PCIPT.Windows
 
             ShiftGraph(shift);
 
-            if (nodesRealSize.Count == 0)
+            if (realNodesSize.Count == 0)
             {
                 renderThread = new(delegate ()
                 {
+                    Thread.Sleep(100);
                     DoCmd(delegate () { AutoNormalizeElementsOnGraph(size); });
                 });
                 renderThread.IsBackground = true;
@@ -237,6 +273,7 @@ namespace PCIPT.Windows
         {
             if (Init)
             {
+                RenderVehicles(CurrentSize);
                 RenderCircleGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
             }
         }
@@ -261,8 +298,8 @@ namespace PCIPT.Windows
 
         private void Down_Click(object sender, RoutedEventArgs e)
         {
-            AddToTotalOffset(new(0, +20));
-            ShiftGraph(new(0, +20));
+            AddToTotalOffset(new(0, 20));
+            ShiftGraph(new(0, 20));
         }
 
         private void SizePlus_Click(object sender, RoutedEventArgs e)
@@ -290,30 +327,9 @@ namespace PCIPT.Windows
             switch (e.Key)
             {
                 case Key.I:
-                    InitCircleGraph(Nodes);
+                    InitEverything(Nodes, DistributedTasks);
+                    RenderVehicles(CurrentSize);
                     RenderCircleGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
-                    break;
-                case Key.Y:
-                    RenderCircleGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
-                    break;
-                case Key.X:
-                    AutoNormalizeElementsOnGraph(CurrentSize);
-                    break;
-                case Key.Down:
-                    AddToTotalOffset(new(0, +10));
-                    ShiftGraph(new(0, +10));
-                    break;
-                case Key.Up:
-                    AddToTotalOffset(new(0, -10));
-                    ShiftGraph(new(0, -10));
-                    break;
-                case Key.Left:
-                    AddToTotalOffset(new(+10, 0));
-                    ShiftGraph(new(+10, 0));
-                    break;
-                case Key.Right:
-                    AddToTotalOffset(new(-10, 0));
-                    ShiftGraph(new(-10, 0));
                     break;
             }
         }
