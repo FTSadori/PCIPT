@@ -38,7 +38,6 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
         {
             routeDtos = routes.ToList();
             nodeDtos = nodes.ToList();
-            nodeCount = nodeDtos.Count;
         }
 
         private static Path? DijkstraAlgorithm(int startPointId, int endPointId)
@@ -98,6 +97,5 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
         private static List<NodeDto> nodeDtos = new();
         private static List<RouteDto> routeDtos = new();
         private static Dictionary<string, Path> savedRoutes = new();
-        private static int nodeCount = 0;
     }
 }

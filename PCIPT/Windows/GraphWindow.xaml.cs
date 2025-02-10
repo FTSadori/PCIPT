@@ -1,15 +1,22 @@
 ﻿using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
 using PCIPT.Core.DataHandler;
+using PCIPT.Dtos.Cargoes;
+using PCIPT.Dtos.CargoTurnoverPoints;
+using PCIPT.Dtos.Graph;
 using PCIPT.Dtos.Node;
 using PCIPT.Dtos.Routes;
+using PCIPT.Dtos.Vehicles;
+using PCIPT.Dtos.VehicleTypes;
 using PCIPT.Windows.DataHandlers;
 using PCIPT.Windows.ObjectCreators;
+using PCIPT.Windows.Simulation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,6 +48,20 @@ namespace PCIPT.Windows
             Nodes = CsvHandler.GetAllFromFile<NodeDto>("Nodes.csv");
             Routes = CsvHandler.GetAllFromFile<RouteDto>("Routes.csv");
             DistributedTasks = CsvHandler.GetAllFromFile<VehicleByRoutesRow>("DistributedTasks.csv");
+            NodesCoords = CsvHandler.GetAllFromFile<NodesCoordsDto>("NodesCoords.csv");
+            CargoPoints = CsvHandler.GetAllFromFile<CargoTurnoverPointDto>("CargoTurnoverPoints.csv");
+            VehicleTypes = CsvHandler.GetAllFromFile<VehicleTypeDto>("VehicleTypes.csv");
+            Cargoes = CsvHandler.GetAllFromFile<CargoDto>("Cargoes.csv");
+
+            Vehicles = new List<VehicleDto>();
+            var records = CsvHandler.GetAllFromFile<FuelVehicleDto>("FuelVehicles.csv");
+            foreach (var record in records)
+                Vehicles.Add(record);
+            var records2 = CsvHandler.GetAllFromFile<ElectricVehicleDto>("ElectricVehicles.csv");
+            foreach (var record in records2)
+                Vehicles.Add(record);
+
+
         }
 
         public static void DoCmd(ThreadStart th)
@@ -52,33 +73,31 @@ namespace PCIPT.Windows
         private List<GraphVehiclesData> vehiclesCoords = new();
         private List<NegSize> realNodesSize = new();
 
+        private List<int> starts;
+
         private readonly List<NodeDto> Nodes;
         private readonly List<RouteDto> Routes;
         private readonly List<VehicleByRoutesRow> DistributedTasks;
+        private readonly List<NodesCoordsDto> NodesCoords;
+        private readonly List<CargoTurnoverPointDto> CargoPoints;
+        private readonly List<VehicleTypeDto> VehicleTypes;
+        private readonly List<CargoDto> Cargoes;
+        private readonly List<VehicleDto> Vehicles;
 
         private double CurrentSize = 1;
         private bool Init = false;
         private double TotalShiftHeight = 0;
         private double TotalShiftWidth = 0;
 
-        private void InitEverything(List<NodeDto> nodes, List<VehicleByRoutesRow> distributedTasks)
+        private void InitEverything(List<VehicleByRoutesRow> distributedTasks)
         {
-            InitCircleGraph(nodes);
+            InitGraph();
             InitVehicles(distributedTasks);
         }
 
-        private void InitCircleGraph(List<NodeDto> nodes)
+        private void InitGraph()
         {
-            nodesCoords.Clear();
-
-            int N = nodes.Count;
-
-            double angle = 2.0 * Math.PI / N;
-
-            for (int i = 0; i < N; i++)
-            {
-                nodesCoords.Add(nodes[i].Id, new NegSize(Math.Cos(i * angle), Math.Sin(i * angle)));
-            }
+            nodesCoords = NormalizedCoordsConventer.ConvertFromOtherCoords(NodesCoords);
 
             Init = true;
         }
@@ -148,7 +167,7 @@ namespace PCIPT.Windows
 
         private void InitVehicles(List<VehicleByRoutesRow> distributedTasks)
         {
-            vehiclesCoords = GraphVehicleDataConverter.InitConvert(distributedTasks, nodesCoords);
+            vehiclesCoords = GraphVehicleDataConverter.InitConvert(distributedTasks, nodesCoords, out starts);
         }
 
         private void RenderVehicles(double size)
@@ -161,7 +180,7 @@ namespace PCIPT.Windows
             }
         }
 
-        private void RenderCircleGraph(List<NodeDto> nodes, List<RouteDto> routes, double size, NegSize shift)
+        private void RenderGraph(List<NodeDto> nodes, List<RouteDto> routes, double size, NegSize shift)
         {
             GraphCanvas.Children.Clear();
 
@@ -199,7 +218,7 @@ namespace PCIPT.Windows
             {
                 renderThread = new(delegate ()
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(50);
                     DoCmd(delegate () { AutoNormalizeElementsOnGraph(size); });
                 });
                 renderThread.IsBackground = true;
@@ -274,7 +293,7 @@ namespace PCIPT.Windows
             if (Init)
             {
                 RenderVehicles(CurrentSize);
-                RenderCircleGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+                RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
             }
         }
 
@@ -322,14 +341,40 @@ namespace PCIPT.Windows
             Rerender();
         }
 
+        Thread? simulationThread = null;
+
+        private void StartSimulation()
+        {
+            simulationThread = new(delegate ()
+            {
+                while (true)
+                {
+                    Thread.Sleep(10);
+                    DoCmd(delegate () { 
+                        simulationController.NextStep(10);
+                        vehiclesCoords = simulationController.GetNewGraphVehiclesData();
+                        RenderVehicles(CurrentSize);
+                    });
+                }
+            });
+            simulationThread.IsBackground = true;
+            simulationThread.Start();
+        }
+
+        SimulationController simulationController;
+
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
                 case Key.I:
-                    InitEverything(Nodes, DistributedTasks);
+                    InitEverything(DistributedTasks);
                     RenderVehicles(CurrentSize);
-                    RenderCircleGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+                    RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+                    break;
+                case Key.J:
+                    simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts);
+                    StartSimulation();
                     break;
             }
         }

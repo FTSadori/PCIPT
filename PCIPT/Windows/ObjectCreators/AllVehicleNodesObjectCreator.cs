@@ -13,7 +13,7 @@ namespace PCIPT.Windows.ObjectCreators
     public sealed class AllVehicleNodesObjectCreator
     {
         private static Dictionary<string, Color> pickedColors = new();
-        private const int colorDistance = 20;
+        private const int colorDistance = 30;
 
         public static List<Ellipse> GetObjects(List<GraphVehiclesData> vehiclesDatas, double size)
         {
@@ -25,7 +25,10 @@ namespace PCIPT.Windows.ObjectCreators
                 {
                     pickedColors.Add(data.Type, MakeDifferentColor());
                 }
-                ellipses.Add(VehicleNodeObjectCreator.GetObject(new SolidColorBrush(pickedColors[data.Type]), size, data.Coord));
+                NegSize neg = new(
+                    data.Coord.Width - VehicleNodeObjectCreator.EllipseSize / 2 * size,
+                    data.Coord.Height - VehicleNodeObjectCreator.EllipseSize / 2 * size);
+                ellipses.Add(VehicleNodeObjectCreator.GetObject(new SolidColorBrush(pickedColors[data.Type]), size, neg));
             }
 
             return ellipses;

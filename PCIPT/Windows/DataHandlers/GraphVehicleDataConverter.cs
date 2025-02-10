@@ -18,9 +18,10 @@ namespace PCIPT.Windows.DataHandlers
         static Random random = new();
         const double RandomMaxRange = 0.1;
 
-        public static List<GraphVehiclesData> InitConvert(List<VehicleByRoutesRow> vehicleByRoutes, Dictionary<int, NegSize> nodesCoords)
+        public static List<GraphVehiclesData> InitConvert(List<VehicleByRoutesRow> vehicleByRoutes, Dictionary<int, NegSize> nodesCoords, out List<int> starts)
         {
             List<GraphVehiclesData> result = new();
+            starts = new();
 
             Dictionary<string, List<NegSize>> typesAndStartPoints = new();
             foreach (var vehicleByRoute in vehicleByRoutes)
@@ -37,6 +38,7 @@ namespace PCIPT.Windows.DataHandlers
                         nodesCoords[vehicleByRoute.PointId].Width + randomLength * Math.Cos(randomAngle),
                         nodesCoords[vehicleByRoute.PointId].Height + randomLength * Math.Sin(randomAngle));
                     typesAndStartPoints[vehicleByRoute.Name].Add(randomizedCoords);
+                    starts.Add(vehicleByRoute.PointId);
                 }
             }
 
