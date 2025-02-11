@@ -18,6 +18,8 @@ namespace PCIPT.Windows.Simulation
 {
     public sealed class SimulationController
     {
+        static Random random = new();
+
         private List<VehicleByRoutesRow> plan;
 
         private List<VehicleTypeDto> vehicleTypes;
@@ -25,10 +27,15 @@ namespace PCIPT.Windows.Simulation
         private List<VehicleObject> vehicleObjects = new();
         private List<PointObject> pointObjects = new();
 
-        public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, List<int> startPoints)
+        private Dictionary<int, NegSize> nodesCoords;
+
+        private string logFilePath;
+
+        public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, List<int> startPoints, List<NegSize> biases, string logFilePath)
         {
             this.plan = plan;
             this.vehicleTypes = vehicleTypes;
+            this.nodesCoords = nodesCoords;
 
             foreach (var dto in pointsDto)
             {
@@ -52,163 +59,237 @@ namespace PCIPT.Windows.Simulation
                 }
                 pairs[dto.Type]++;
 
-                vehicleObjects.Add(new VehicleObject(dto.Coord.Width, dto.Coord.Height, dto.Type, vehicle.LoadCapacity, vehicle.LoadTime, vehicle.SpeedWithLoad, vehicle.SpeedWithoutLoad, vehicle.Type, dto.Coord, startPoints[i++], pairs[dto.Type]));
+                vehicleObjects.Add(new VehicleObject(pairs[dto.Type], dto.Type, vehicle.LoadCapacity, vehicle.LoadTime, vehicle.SpeedWithLoad, vehicle.SpeedWithoutLoad, vehicle.Type, startPoints[i], startPoints[i], biases[i]));
+                ++i;
             }
+
+            this.logFilePath = logFilePath;
         }
 
-        public void NextStep(double deltaSeconds)
+        public void NextStep(double deltaSeconds, double effectiveTime)
         {
+            StreamWriter sw = new(logFilePath, true);
             foreach (var vehicle in vehicleObjects)
             {
+                var effectiveDeltaSeconds = deltaSeconds * random.NextDouble() * (1.0 - effectiveTime) + effectiveTime;
                 switch (vehicle.vehicleState)
                 {
                     case VehicleState.AWAITS:
-                        {
-                            var pointsForVehicle = plan.Where(p => p.Name == vehicle.name && p.Number == vehicle.number).ToList();
-                            foreach (var point in pointsForVehicle)
-                            {
-                                var po = pointObjects.Where(po => po.pointId == point.PointId).First();
-                                if (po.cargoLeft > 0)
-                                {
-                                    vehicle.pointId = po.pointId;
-                                    vehicle.destination = new(po.fromX, po.fromY);
-                                    vehicle.vehicleState = VehicleState.MOVES_WITHOUT_LOAD;
-                                    break;
-                                }
-                            }
-                            if (vehicle.pointId == -1)
-                            {
-                                vehicle.destination = vehicle.startPoint;
-                                vehicle.vehicleState = VehicleState.MOVES_BACK;
-                            }
-                        }
+                        Awaits(vehicle, sw);
                         break;
                     case VehicleState.MOVES_WITH_LOAD:
-                        {
-                            double directionX = vehicle.destination.Width - vehicle.X;
-                            double directionY = vehicle.destination.Height - vehicle.Y;
-                            double l = Math.Sqrt(directionX * directionX + directionY * directionY);
-
-                            directionX /= l;
-                            directionY /= l;
-
-                            var po = pointObjects.Where(po => po.pointId == vehicle.pointId).First();
-
-                            double deltaX = directionX * vehicle.speedWithCargo * deltaSeconds / po.distance;
-                            double deltaY = directionY * vehicle.speedWithCargo * deltaSeconds / po.distance;
-
-                            double deltaL = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                            if (deltaL >= l)
-                            {
-                                deltaL = l;
-                                vehicle.loadTimeRemaining = vehicle.loadTime;
-                                vehicle.vehicleState = VehicleState.UNLOADS;
-                            }
-
-                            vehicle.X += directionX * deltaL;
-                            vehicle.Y += directionY * deltaL;
-                        }
+                        MovesWithLoad(vehicle, sw, effectiveDeltaSeconds);
                         break;
                     case VehicleState.MOVES_WITHOUT_LOAD:
-                        {
-                            double directionX = vehicle.destination.Width - vehicle.X;
-                            double directionY = vehicle.destination.Height - vehicle.Y;
-                            double l = Math.Sqrt(directionX * directionX + directionY * directionY);
-
-                            directionX /= l;
-                            directionY /= l;
-
-                            var po = pointObjects.Where(po => po.pointId == vehicle.pointId).First();
-
-                            double deltaX = directionX * vehicle.speedWithoutCargo * deltaSeconds / po.distance;
-                            double deltaY = directionY * vehicle.speedWithoutCargo * deltaSeconds / po.distance;
-
-                            double deltaL = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                            if (deltaL >= l)
-                            {
-                                deltaL = l;
-                                if (po.cargoLeft > 0f)
-                                {
-                                    po.cargoLeft -= vehicle.maxLoad * po.utilizationRate;
-                                    vehicle.loadTimeRemaining = vehicle.loadTime;
-                                    vehicle.vehicleState = VehicleState.LOADS;
-                                }
-                            }
-
-                            vehicle.X += directionX * deltaL;
-                            vehicle.Y += directionY * deltaL;
-                        }
+                        MovesWithoutLoad(vehicle, sw, effectiveDeltaSeconds);
                         break;
                     case VehicleState.MOVES_BACK:
-                        {
-                            double directionX = vehicle.destination.Width - vehicle.X;
-                            double directionY = vehicle.destination.Height - vehicle.Y;
-                            double l = Math.Sqrt(directionX * directionX + directionY * directionY);
-
-                            directionX /= l;
-                            directionY /= l;
-
-                            var po = pointObjects.Where(po => po.pointId == vehicle.pointId).First();
-                            double len = RouteCalculator.GetDistanceBetween(po.toId, vehicle.startId);
-
-                            double deltaX = directionX * vehicle.speedWithoutCargo * deltaSeconds / len;
-                            double deltaY = directionY * vehicle.speedWithoutCargo * deltaSeconds / len;
-
-                            double deltaL = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
-
-                            if (deltaL >= l)
-                            {
-                                deltaL = l;
-                            }
-
-                            vehicle.X += directionX * deltaL;
-                            vehicle.Y += directionY * deltaL;
-                        }
+                        MovesBack(vehicle, sw, effectiveDeltaSeconds);
                         break;
                     case VehicleState.LOADS:
-                        {
-                            if (vehicle.loadTimeRemaining < 0)
-                            {
-                                vehicle.vehicleState = VehicleState.MOVES_WITH_LOAD;
-
-                                var po = pointObjects.Where(po => po.pointId == vehicle.pointId).First();
-                                if (po.cargoLeft > 0)
-                                {
-                                    vehicle.destination = new(po.toX, po.toY);
-                                    vehicle.vehicleState = VehicleState.MOVES_WITH_LOAD;
-                                }
-                                else
-                                {
-                                    vehicle.vehicleState = VehicleState.AWAITS;
-                                }
-                            }
-                            else vehicle.loadTimeRemaining -= deltaSeconds;
-                        }
+                        Loads(vehicle, sw, effectiveDeltaSeconds);
                         break;
                     case VehicleState.UNLOADS:
-                        {
-                            if (vehicle.loadTimeRemaining < 0)
-                            {
-                                vehicle.vehicleState = VehicleState.MOVES_WITHOUT_LOAD;
-
-                                var po = pointObjects.Where(po => po.pointId == vehicle.pointId).First();
-                                if (po.cargoLeft > 0)
-                                {
-                                    vehicle.destination = new(po.fromX, po.fromY);
-                                    vehicle.vehicleState = VehicleState.MOVES_WITHOUT_LOAD;
-                                }
-                                else
-                                {
-                                    vehicle.vehicleState = VehicleState.AWAITS;
-                                }
-                            }
-                            else vehicle.loadTimeRemaining -= deltaSeconds;
-                        }
+                        Unloads(vehicle, sw, effectiveDeltaSeconds);
                         break;
                 }
             }
+            sw.Close();
+        }
+
+        public void ChangeState(VehicleObject vehicle, StreamWriter sw, VehicleState state)
+        {
+            sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) changed state from {vehicle.vehicleState} to {state}");
+            vehicle.vehicleState = state;
+        }
+
+        public void MovesBack(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        {
+            int sourceId = vehicle.path[vehicle.pathIterator];
+            int destinationId = vehicle.path[vehicle.pathIterator + 1];
+            double dist = RouteCalculator.GetDistanceBetween(sourceId, destinationId);
+
+            double delta = vehicle.speedWithoutCargo * deltaSeconds / dist;
+            vehicle.lPassed += delta;
+
+            if (vehicle.lPassed >= 1)
+            {
+                vehicle.lPassed = 0;
+                vehicle.lastNodeId = destinationId;
+                vehicle.pathIterator++;
+
+                if (vehicle.pathIterator >= vehicle.path.Count - 1)
+                {
+                    vehicle.loadTimeRemaining = vehicle.loadTime;
+                    ChangeState(vehicle, sw, VehicleState.OVER);
+                    return;
+                }
+                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+            }
+        }
+
+        public void MovesWithoutLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        {
+            int sourceId = vehicle.path[vehicle.pathIterator];
+            int destinationId = vehicle.path[vehicle.pathIterator + 1];
+            double dist = RouteCalculator.GetDistanceBetween(sourceId, destinationId);
+
+            double delta = vehicle.speedWithoutCargo * deltaSeconds / dist;
+            vehicle.lPassed += delta;
+            //sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) moved without load by {delta * 100:0.00}% (total of {Math.Min(vehicle.lPassed * 100, 100):0.00}%)");
+
+            if (vehicle.lPassed >= 1)
+            {
+                vehicle.lPassed = 0;
+                vehicle.lastNodeId = destinationId;
+                vehicle.pathIterator++;
+
+                if (vehicle.pathIterator >= vehicle.path.Count - 1)
+                {
+                    vehicle.loadTimeRemaining = vehicle.loadTime;
+                    ChangeState(vehicle, sw, VehicleState.LOADS);
+                    return;
+                }
+                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+            }
+        }
+
+        public void Unloads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        {
+            if (vehicle.loadTimeRemaining < 0)
+            {
+                var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
+
+                if (po.cargoLeft > 0)
+                {
+                    // get ahead of time
+                    po.cargoLeft = Math.Max(-0.01, po.cargoLeft - vehicle.maxLoad * po.utilizationRate);
+                    //
+
+                    var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.fromId);
+                    if (path == null)
+                    {
+                        sw.WriteLine($"=========================== ERROR ===========================");
+                        sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
+                        sw.WriteLine($"=============================================================");
+                        return;
+                    }
+
+                    vehicle.path = path.Nodes;
+                    vehicle.pathIterator = 0;
+                    vehicle.lPassed = 0;
+                    ChangeState(vehicle, sw, VehicleState.MOVES_WITHOUT_LOAD);
+                    return;
+                }
+
+                ChangeState(vehicle, sw, VehicleState.AWAITS);
+            }
+            else vehicle.loadTimeRemaining -= deltaSeconds;
+        }
+
+        public void Loads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        {
+            if (vehicle.loadTimeRemaining < 0)
+            {
+                var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
+
+                var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.toId);
+                if (path == null)
+                {
+                    sw.WriteLine($"=========================== ERROR ===========================");
+                    sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.toId}");
+                    sw.WriteLine($"=============================================================");
+                    return;
+                }
+
+                vehicle.path = path.Nodes;
+                vehicle.pathIterator = 0;
+                vehicle.lPassed = 0;
+                ChangeState(vehicle, sw, VehicleState.MOVES_WITH_LOAD);
+            }
+            else vehicle.loadTimeRemaining -= deltaSeconds;
+        }
+
+        public void MovesWithLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        {
+            int sourceId = vehicle.path[vehicle.pathIterator];
+            int destinationId = vehicle.path[vehicle.pathIterator + 1];
+            double dist = RouteCalculator.GetDistanceBetween(sourceId, destinationId);
+
+            double delta = vehicle.speedWithCargo * deltaSeconds / dist;
+            vehicle.lPassed += delta;
+            //sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) moved with load by {delta*100:0.00}% (total of {Math.Min(vehicle.lPassed*100, 100):0.00}%)");
+
+            if (vehicle.lPassed >= 1)
+            {
+                vehicle.lPassed = 0;
+                vehicle.lastNodeId = destinationId;
+                vehicle.pathIterator++;
+
+                if (vehicle.pathIterator >= vehicle.path.Count - 1)
+                {
+                    var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
+                    vehicle.load = vehicle.maxLoad * po.utilizationRate;
+                    vehicle.loadTimeRemaining = vehicle.loadTime;
+                    ChangeState(vehicle, sw, VehicleState.UNLOADS);
+                    return;
+                }
+                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+            }
+        }
+
+        public void Awaits(VehicleObject vehicle, StreamWriter sw)
+        {
+            var pointsForVehicle = plan.Where(p => p.Name == vehicle.name && p.Number == vehicle.number).ToList();
+            foreach (var point in pointsForVehicle)
+            {
+                var po = pointObjects.Where(po => po.pointId == point.PointId).First();
+                if (po.cargoLeft > 0)
+                {
+                    // get ahead of time
+                    po.cargoLeft = Math.Max(-0.01, po.cargoLeft - vehicle.maxLoad * po.utilizationRate);
+                    //
+
+                    if (vehicle.lastNodeId == po.fromId)
+                    {
+                        vehicle.loadTimeRemaining = vehicle.loadTime;
+                        vehicle.lPassed = 0;
+                        vehicle.lastPointId = point.PointId;
+                        ChangeState(vehicle, sw, VehicleState.LOADS);
+                        return;
+                    }
+
+                    var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.fromId);
+                    if (path == null)
+                    {
+                        sw.WriteLine($"=========================== ERROR ===========================");
+                        sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
+                        sw.WriteLine($"=============================================================");
+                        return;
+                    }
+
+                    vehicle.path = path.Nodes;
+                    vehicle.pathIterator = 0;
+                    vehicle.lPassed = 0;
+                    vehicle.lastPointId = point.PointId;
+                    ChangeState(vehicle, sw, VehicleState.MOVES_WITHOUT_LOAD);
+                    return;
+                }
+            }
+
+            var path2 = RouteCalculator.GetPathBetween(vehicle.lastNodeId, vehicle.startId);
+            if (path2 == null)
+            {
+                sw.WriteLine($"=========================== ERROR ===========================");
+                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {vehicle.startId}");
+                sw.WriteLine($"=============================================================");
+                return;
+            }
+
+            vehicle.path = path2.Nodes;
+            vehicle.pathIterator = 0;
+            vehicle.lPassed = 0;
+            ChangeState(vehicle, sw, VehicleState.MOVES_BACK);
         }
 
         public List<GraphVehiclesData> GetNewGraphVehiclesData()
@@ -217,7 +298,24 @@ namespace PCIPT.Windows.Simulation
 
             foreach (var vehicle in vehicleObjects)
             {
-                graphVehiclesDatas.Add(new GraphVehiclesData(vehicle.name, new(vehicle.X, vehicle.Y)));
+                if (vehicle.vehicleState == VehicleState.MOVES_WITH_LOAD ||
+                    vehicle.vehicleState == VehicleState.MOVES_WITHOUT_LOAD ||
+                    vehicle.vehicleState == VehicleState.MOVES_BACK)
+                {
+                    var coordFirst = nodesCoords[vehicle.path[vehicle.pathIterator]];
+                    var coordSecond = nodesCoords[vehicle.path[vehicle.pathIterator + 1]];
+
+                    graphVehiclesDatas.Add(new GraphVehiclesData(vehicle.name,
+                        new((coordFirst.Width) * (1.0 - vehicle.lPassed) + (coordSecond.Width) * vehicle.lPassed,
+                        (coordFirst.Height) * (1.0 - vehicle.lPassed) + (coordSecond.Height) * vehicle.lPassed))
+                        );
+                }
+                else
+                {
+                    var coord = nodesCoords[vehicle.lastNodeId];
+
+                    graphVehiclesDatas.Add(new GraphVehiclesData(vehicle.name, new(coord.Width, coord.Height)));
+                }
             }
 
             return graphVehiclesDatas;

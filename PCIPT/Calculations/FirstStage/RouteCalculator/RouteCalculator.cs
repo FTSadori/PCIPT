@@ -34,6 +34,24 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
             return path.TotalDistance;
         }
 
+        public static Path? GetPathBetween(int startPointId, int endPointId)
+        {
+            float dist = GetDistanceBetween(startPointId, endPointId);
+            if (dist == float.PositiveInfinity)
+            {
+                return null;
+            }
+
+            string var = startPointId + "_" + endPointId;
+
+            if (savedRoutes.ContainsKey(var))
+            {
+                return savedRoutes[var];
+            }
+
+            return new Path(new() { startPointId, endPointId }, dist);
+        }
+
         public static void InitRoutes(List<RouteDto> routes, List<NodeDto> nodes)
         {
             routeDtos = routes.ToList();
@@ -92,7 +110,7 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
             return new Path(Nodes, vertexSum[endPointId]);
         }
 
-        private sealed record Path(List<int> Nodes, float TotalDistance);
+        public sealed record Path(List<int> Nodes, float TotalDistance);
 
         private static List<NodeDto> nodeDtos = new();
         private static List<RouteDto> routeDtos = new();

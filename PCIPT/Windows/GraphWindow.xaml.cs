@@ -74,6 +74,7 @@ namespace PCIPT.Windows
         private List<NegSize> realNodesSize = new();
 
         private List<int> starts;
+        private List<NegSize> biases;
 
         private readonly List<NodeDto> Nodes;
         private readonly List<RouteDto> Routes;
@@ -167,14 +168,14 @@ namespace PCIPT.Windows
 
         private void InitVehicles(List<VehicleByRoutesRow> distributedTasks)
         {
-            vehiclesCoords = GraphVehicleDataConverter.InitConvert(distributedTasks, nodesCoords, out starts);
+            vehiclesCoords = GraphVehicleDataConverter.InitConvert(distributedTasks, nodesCoords, CargoPoints, out starts, out biases);
         }
 
         private void RenderVehicles(double size)
         {
             VehiclesGraphCanvas.Children.Clear();
 
-            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size), size))
+            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size, new(TotalShiftWidth, TotalShiftHeight)), size))
             {
                 VehiclesGraphCanvas.Children.Add(child);
             }
@@ -294,6 +295,12 @@ namespace PCIPT.Windows
             {
                 RenderVehicles(CurrentSize);
                 RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+
+                if (simulationThread != null)
+                {
+                    vehiclesCoords = simulationController.GetNewGraphVehiclesData();
+                    RenderVehicles(CurrentSize);
+                }
             }
         }
 
@@ -349,12 +356,17 @@ namespace PCIPT.Windows
             {
                 while (true)
                 {
-                    Thread.Sleep(10);
+                    for (int i = 0; i < 30; ++i)
+                    {
+                        DoCmd(delegate () {
+                            simulationController.NextStep(1, 0.85);
+                        });
+                    }
                     DoCmd(delegate () { 
-                        simulationController.NextStep(10);
                         vehiclesCoords = simulationController.GetNewGraphVehiclesData();
                         RenderVehicles(CurrentSize);
                     });
+                    Thread.Sleep(10);
                 }
             });
             simulationThread.IsBackground = true;
@@ -373,7 +385,7 @@ namespace PCIPT.Windows
                     RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
                     break;
                 case Key.J:
-                    simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts);
+                    simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
                     StartSimulation();
                     break;
             }

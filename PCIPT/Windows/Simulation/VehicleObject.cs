@@ -16,16 +16,17 @@ namespace PCIPT.Windows.Simulation
         MOVES_BACK,
         LOADS,
         UNLOADS,
+        OVER,
     }
 
     public sealed class VehicleObject
     {
-        public double X;
-        public double Y;
-        public NegSize? destination = null;
-        public NegSize startPoint;
+        public NegSize bias;
         public int number;
-        public int pointId = -1;
+        public List<int> path = new();
+        public int pathIterator;
+        public int lastNodeId;
+        public double lPassed = 0;
         public double load = 0;
         public string name;
         public double maxLoad;
@@ -33,23 +34,24 @@ namespace PCIPT.Windows.Simulation
         public double speedWithCargo;
         public double speedWithoutCargo;
         public string vehicleType;
+        public int lastPointId;
         public VehicleState vehicleState = VehicleState.AWAITS;
         public double loadTimeRemaining;
         public int startId = -1;
+        public bool dislocated = true;
 
-        public VehicleObject(double x, double y, string name, double maxLoad, double loadTime, double speedWithCargo, double speedWithoutCargo, string vehicleType, NegSize startPoint, int startId, int number)
+        public VehicleObject(int number, string name, double maxLoad, double loadTime, double speedWithCargo, double speedWithoutCargo, string vehicleType, int startId, int lastNodeId, NegSize bias)
         {
-            X = x;
-            Y = y;
+            this.number = number;
             this.name = name;
             this.maxLoad = maxLoad;
             this.loadTime = loadTime;
             this.speedWithCargo = speedWithCargo;
             this.speedWithoutCargo = speedWithoutCargo;
             this.vehicleType = vehicleType;
-            this.startPoint = startPoint;
             this.startId = startId;
-            this.number = number;
+            this.lastNodeId = lastNodeId;
+            this.bias = bias;
         }
     }
 }
