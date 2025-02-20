@@ -34,6 +34,7 @@ namespace PCIPT.Windows.Simulation
         public double speedWithCargo;
         public double speedWithoutCargo;
         public string vehicleType;
+        public double plannedTimeLeft;
         public int lastPointId;
         public VehicleState vehicleState = VehicleState.AWAITS;
         public double loadTimeRemaining;

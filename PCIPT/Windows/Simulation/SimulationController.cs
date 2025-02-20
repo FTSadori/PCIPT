@@ -31,6 +31,8 @@ namespace PCIPT.Windows.Simulation
 
         private string logFilePath;
 
+        private Performance performance = new();
+
         public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, List<int> startPoints, List<NegSize> biases, string logFilePath)
         {
             this.plan = plan;
@@ -87,9 +89,11 @@ namespace PCIPT.Windows.Simulation
                         MovesBack(vehicle, sw, effectiveDeltaSeconds);
                         break;
                     case VehicleState.LOADS:
+                        performance.accumulatedLoadTime += deltaSeconds;
                         Loads(vehicle, sw, effectiveDeltaSeconds);
                         break;
                     case VehicleState.UNLOADS:
+                        performance.accumulatedUnloadTime += deltaSeconds;
                         Unloads(vehicle, sw, effectiveDeltaSeconds);
                         break;
                 }
@@ -160,6 +164,7 @@ namespace PCIPT.Windows.Simulation
             {
                 var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
 
+                performance.unloadTimes += 1;
                 if (po.cargoLeft > 0)
                 {
                     // get ahead of time
@@ -193,6 +198,8 @@ namespace PCIPT.Windows.Simulation
             {
                 var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
 
+                performance.loadTimes += 1;
+
                 var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.toId);
                 if (path == null)
                 {
@@ -207,7 +214,10 @@ namespace PCIPT.Windows.Simulation
                 vehicle.lPassed = 0;
                 ChangeState(vehicle, sw, VehicleState.MOVES_WITH_LOAD);
             }
-            else vehicle.loadTimeRemaining -= deltaSeconds;
+            else
+            {
+                vehicle.loadTimeRemaining -= deltaSeconds;
+            }
         }
 
         public void MovesWithLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
@@ -290,6 +300,14 @@ namespace PCIPT.Windows.Simulation
             vehicle.pathIterator = 0;
             vehicle.lPassed = 0;
             ChangeState(vehicle, sw, VehicleState.MOVES_BACK);
+        }
+
+        public void SaveStats()
+        {
+            StreamWriter sw = new("PERFORMANCE.TXT");
+            sw.WriteLine($"Average load time: {performance.AverageLoadTime}");
+            sw.WriteLine($"Average unload time: {performance.AverageUnloadTime}");
+            sw.Close();
         }
 
         public List<GraphVehiclesData> GetNewGraphVehiclesData()

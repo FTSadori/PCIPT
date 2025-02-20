@@ -9,6 +9,11 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\Framework\Command\" />
   </ItemGroup>
 
 </Project>

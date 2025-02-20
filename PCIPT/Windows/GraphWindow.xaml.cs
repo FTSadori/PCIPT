@@ -388,6 +388,9 @@ namespace PCIPT.Windows
                     simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
                     StartSimulation();
                     break;
+                case Key.K:
+                    simulationController.SaveStats();
+                    break;
             }
         }
     }

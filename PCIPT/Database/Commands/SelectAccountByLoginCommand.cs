@@ -1,0 +1,38 @@
+﻿using Client.Runtime.Framework.Command;
+using Microsoft.Data.SqlClient;
+using PCIPT.Calculations.FirstStage.CostByVehicle.Dtos;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace PCIPT.Database.Commands
+{
+    public sealed class SelectAccountByLoginCommand : ICommand<string, DataRow?>
+    {
+        SqlConnection SqlConnection { get; set; }
+
+        public SelectAccountByLoginCommand(SqlConnection sqlConnection)
+        {
+            SqlConnection = sqlConnection;
+        }
+
+        public DataRow? Execute(string login)
+        {
+            try
+            {
+                SqlCommand cmd = new($"SELECT * FROM Passwords WHERE login='{login}'", SqlConnection);
+                DataSet data = new();
+                SqlDataAdapter adapter = new(cmd);
+                adapter.Fill(data);
+                return data.Tables[0].Rows[0];
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+    }
+}
