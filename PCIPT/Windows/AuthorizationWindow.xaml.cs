@@ -98,13 +98,13 @@ namespace PCIPT.Windows
                 var account = new SelectAccountByLoginCommand(DbContext.SqlConnection).Execute((string)dataRow["login"]);
                 if (account == null)
                 {
-                    MiniErrorBox.Text = "Wrong login";
-                    MiniErrorBox.Background = Brushes.Red;
+                    //MiniErrorBox.Text = "Wrong login";
+                    //MiniErrorBox.Background = Brushes.Red;
                     return;
                 }
 
-                MiniErrorBox.Text = "Logged in via token as " + (string)account["login"];
-                MiniErrorBox.Background = Brushes.Green;
+                //MiniErrorBox.Text = "Logged in via token as " + (string)account["login"];
+                //MiniErrorBox.Background = Brushes.Green;
             }
             catch (Exception)
             {
@@ -116,22 +116,22 @@ namespace PCIPT.Windows
             var account = new SelectAccountByLoginCommand(DbContext.SqlConnection).Execute(LoginBox.Text);
             if (account == null)
             {
-                MiniErrorBox.Text = "Wrong login";
-                MiniErrorBox.Background = Brushes.Red;
+                //MiniErrorBox.Text = "Wrong login";
+                //MiniErrorBox.Background = Brushes.Red;
                 return;
             }
             if (Hasher.GetHashString(PasswordBox.Password + (string)account["salt"]) != (string)account["passhash"])
             {
-                MiniErrorBox.Text = "Wrong password";
-                MiniErrorBox.Background = Brushes.Red;
+                //MiniErrorBox.Text = "Wrong password";
+                //MiniErrorBox.Background = Brushes.Red;
                 return;
             }
             if (RememberMeCheckBox.IsChecked ?? false)
             {
                 if (new DeleteTokenByLoginCommand(DbContext.SqlConnection).Execute(LoginBox.Text) != "")
                 {
-                    MiniErrorBox.Text = "Connection error";
-                    MiniErrorBox.Background = Brushes.Red;
+                    //MiniErrorBox.Text = "Connection error";
+                    //MiniErrorBox.Background = Brushes.Red;
                     return;
                 }
 
@@ -139,8 +139,8 @@ namespace PCIPT.Windows
 
                 if (new AddTokenEntryCommand(DbContext.SqlConnection).Execute(new TokenDto(Hasher.GetHashString(token), LoginBox.Text)) != "")
                 {
-                    MiniErrorBox.Text = "Token saving error";
-                    MiniErrorBox.Background = Brushes.Red;
+                    //MiniErrorBox.Text = "Token saving error";
+                    //MiniErrorBox.Background = Brushes.Red;
                     return;
                 }
 
@@ -149,8 +149,8 @@ namespace PCIPT.Windows
                 sw.Close();
             }
 
-            MiniErrorBox.Text = "Amazing!";
-            MiniErrorBox.Background = Brushes.Green;
+            //MiniErrorBox.Text = "Amazing!";
+            //MiniErrorBox.Background = Brushes.Green;
 
             return;
         }
