@@ -173,8 +173,8 @@
             </Border>
         </StackPanel>
 
-        <Grid Background="#33000000" Visibility="Visible">
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Grid Background="#33000000" Visibility="Hidden" Name="ErrorBackground">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="ErrorGrid">
                 <Border CornerRadius="20 20 0 0" Height="36" Background="{DynamicResource ErrorGradient}" ClipToBounds="True">
                     <Grid>
                         <StackPanel VerticalAlignment="Center">
@@ -184,10 +184,10 @@
                 </Border>
                 <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 0">
                     <StackPanel Orientation="Vertical" Visibility="Visible">
-                        <TextBlock Margin="0 0 0 10" Width="250" Style="{DynamicResource SmallPrettyText}" Foreground="{DynamicResource ErrorGradient}" FontSize="18" TextWrapping="Wrap">Error message good error message good error message</TextBlock>
+                        <TextBlock Name="ErrorText" Margin="0 0 0 10" Width="250" Style="{DynamicResource SmallPrettyText}" Foreground="{DynamicResource ErrorGradient}" FontSize="18" TextWrapping="Wrap">Error message good error message good error message</TextBlock>
                         <Grid HorizontalAlignment="Center" Margin="0 5 0 10">
-                            <Button Visibility="Hidden" BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Width="100" Click="LoginButton_Click">Okay</Button>
-                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Width="100" Click="LoginButton_Click">Try again</Button>
+                            <Button Visibility="Hidden" BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Width="100" Name="OkayButton" Click="OkayButton_Click">Try again</Button>
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Width="100" Name="RetryButton" Click="RetryButton_Click">Retry</Button>
                         </Grid>
                     </StackPanel>
                 </Border>

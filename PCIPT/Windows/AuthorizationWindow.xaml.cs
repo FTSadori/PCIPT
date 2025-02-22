@@ -34,17 +34,27 @@ namespace PCIPT.Windows
         {
             InitializeComponent();
 
+            Connect();
+        }
+
+        public void Connect()
+        {
             asyncConnectThread = new(delegate ()
             {
                 try
                 {
                     DbContext.Connect("Server=WIN-00R1JQV3UDA\\SQLEXPRESS; Database=PCIPT; Trusted_connection=True; Encrypt=False");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
+                    DoCmd(delegate () {
+                        ShowError("Connection error", true);
+                    });
+
                     return;
                 }
 
+                /*
                 var data = new SelectAllAccountEntriesCommand(DbContext.SqlConnection).Execute();
                 if (data == null)
                 {
@@ -58,6 +68,7 @@ namespace PCIPT.Windows
                         count++;
                     }
                 }
+                */
 
                 DoCmd(delegate () {
                     LoginStack.Visibility = Visibility.Visible;
@@ -83,6 +94,21 @@ namespace PCIPT.Windows
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, th);
         }
 
+        private void ShowError(string text, bool retryButton)
+        {
+            ErrorText.Text = text;
+            RetryButton.Visibility = (retryButton) ? Visibility.Visible : Visibility.Hidden;
+            OkayButton.Visibility = (!retryButton) ? Visibility.Visible : Visibility.Hidden;
+            ErrorBackground.Visibility = Visibility.Visible;
+            ErrorGrid.Visibility = Visibility.Visible;
+        }
+
+        private void HideError()
+        {
+            ErrorBackground.Visibility = Visibility.Hidden;
+            ErrorGrid.Visibility = Visibility.Hidden;
+        }
+
         private void TryLoginWithToken()
         {
             try
@@ -98,13 +124,11 @@ namespace PCIPT.Windows
                 var account = new SelectAccountByLoginCommand(DbContext.SqlConnection).Execute((string)dataRow["login"]);
                 if (account == null)
                 {
-                    //MiniErrorBox.Text = "Wrong login";
-                    //MiniErrorBox.Background = Brushes.Red;
+                    ShowError("Wrong login", false);
                     return;
                 }
 
-                //MiniErrorBox.Text = "Logged in via token as " + (string)account["login"];
-                //MiniErrorBox.Background = Brushes.Green;
+                ShowError("Logged in via token as " + (string)account["login"], false);
             }
             catch (Exception)
             {
@@ -116,22 +140,19 @@ namespace PCIPT.Windows
             var account = new SelectAccountByLoginCommand(DbContext.SqlConnection).Execute(LoginBox.Text);
             if (account == null)
             {
-                //MiniErrorBox.Text = "Wrong login";
-                //MiniErrorBox.Background = Brushes.Red;
+                ShowError("Wrong login", false);
                 return;
             }
             if (Hasher.GetHashString(PasswordBox.Password + (string)account["salt"]) != (string)account["passhash"])
             {
-                //MiniErrorBox.Text = "Wrong password";
-                //MiniErrorBox.Background = Brushes.Red;
+                ShowError("Wrong password", false);
                 return;
             }
             if (RememberMeCheckBox.IsChecked ?? false)
             {
                 if (new DeleteTokenByLoginCommand(DbContext.SqlConnection).Execute(LoginBox.Text) != "")
                 {
-                    //MiniErrorBox.Text = "Connection error";
-                    //MiniErrorBox.Background = Brushes.Red;
+                    ShowError("Connection error", false);
                     return;
                 }
 
@@ -139,8 +160,7 @@ namespace PCIPT.Windows
 
                 if (new AddTokenEntryCommand(DbContext.SqlConnection).Execute(new TokenDto(Hasher.GetHashString(token), LoginBox.Text)) != "")
                 {
-                    //MiniErrorBox.Text = "Token saving error";
-                    //MiniErrorBox.Background = Brushes.Red;
+                    ShowError("Token saving error", false);
                     return;
                 }
 
@@ -149,10 +169,20 @@ namespace PCIPT.Windows
                 sw.Close();
             }
 
-            //MiniErrorBox.Text = "Amazing!";
-            //MiniErrorBox.Background = Brushes.Green;
+            ShowError("Amazing!", false);
 
             return;
+        }
+
+        private void OkayButton_Click(object sender, RoutedEventArgs e)
+        {
+            HideError();
+        }
+
+        private void RetryButton_Click(object sender, RoutedEventArgs e)
+        {
+            HideError();
+            Connect();
         }
     }
 }
