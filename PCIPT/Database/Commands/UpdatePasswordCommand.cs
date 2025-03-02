@@ -27,7 +27,7 @@ namespace PCIPT.Database.Commands
             {
                 SqlCommand command = new()
                 {
-                    CommandText = $"UPDATE Customers SET passhash = '{data.NewPasshash}', salt = '{data.NewSalt}' WHERE login = {data.Login};",
+                    CommandText = $"UPDATE Passwords SET passhash = '{data.NewPasshash}', salt = '{data.NewSalt}' WHERE login = '{data.Login}';",
                     Connection = SqlConnection
                 };
                 command.ExecuteNonQuery();

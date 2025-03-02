@@ -54,14 +54,25 @@
             <GradientStop Color="#FF0F0062" Offset="1"/>
             <GradientStop Color="#FF1A318F" Offset="0.528"/>
         </LinearGradientBrush>
-        
+
+        <LinearGradientBrush x:Key="DisableGradient" EndPoint="0,0.5" StartPoint="1,0.5">
+            <GradientStop Color="#992F4F4F"/>
+            <GradientStop Color="#992F4F4F" Offset="1"/>
+            <GradientStop Color="#99808080" Offset="0.528"/>
+        </LinearGradientBrush>
+
         <LinearGradientBrush x:Key="ErrorGradient" EndPoint="0,0.5" StartPoint="1,0.5">
             <GradientStop Color="DarkRed"/>
             <GradientStop Color="DarkRed" Offset="1"/>
             <GradientStop Color="#FFD20000" Offset="0.528"/>
         </LinearGradientBrush>
-
         
+        <LinearGradientBrush x:Key="SuccessGradient" EndPoint="0,0.5" StartPoint="1,0.5">
+            <GradientStop Color="DarkGreen"/>
+            <GradientStop Color="DarkGreen" Offset="1"/>
+            <GradientStop Color="Green" Offset="0.528"/>
+        </LinearGradientBrush>
+
         <LinearGradientBrush x:Key="BackgroundBrush" EndPoint="0,0.5" StartPoint="1,0.5">
             <GradientStop Color="#FF1F0037" Offset="0"/>
             <GradientStop Color="#FF1F0037" Offset="1"/>
@@ -123,7 +134,7 @@
     </Window.Resources>
 
     <Grid Background="{StaticResource BackgroundBrush}">
-        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="AuthorizationPanel">
             <Border CornerRadius="20 20 0 0" Height="60" Width="360.5" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
                 <Grid>
                     <Line X1="10" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
@@ -173,6 +184,186 @@
             </Border>
         </StackPanel>
 
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="AccountMenuPanel" Visibility="Hidden">
+            <Border CornerRadius="20 20 0 0" Height="60" Width="640" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <Line X1="10" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="60" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="110" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="160" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="210" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="3" Opacity="0.05"/>
+                    <Line X1="260" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="310" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="360" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="410" X2="30" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+
+                    <Line X1="-130" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="-80" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="-30" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="20" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="70" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="120" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="3" Opacity="0.05"/>
+                    <Line X1="170" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="3" Opacity="0.05"/>
+                    <Line X1="220" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="3" Opacity="0.05"/>
+                    <Line X1="270" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="320" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="2" Opacity="0.05"/>
+                    <Line X1="370" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Line X1="420" X2="240" Y1="64" Y2="-30" Stroke="White" StrokeThickness="1" Opacity="0.05"/>
+                    <Grid Margin="20 0 20 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource PrettyText}" Foreground="White">PCIPT</TextBlock>
+                            <TextBlock Style="{DynamicResource SmallPrettyText}" Foreground="White" FontSize="12" Margin="0 -5 0 0">SYSTEM</TextBlock>
+                        </StackPanel>
+                        <TextBlock Name="GreetingText" Grid.Column="1" Style="{DynamicResource PrettyText}" FontSize="20" Foreground="White">Hello, user! (admin)</TextBlock>
+                    </Grid>
+                </Grid>
+            </Border>
+            <Border CornerRadius="0 0 5 5" Background="White" Padding="20">
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" FontSize="18" TextAlignment="Center">Manage account</TextBlock>
+                        <Button BorderThickness="0" Height="30" FontSize="16" Style="{DynamicResource RegButton}" Name="ChangePasswordButton" Width="280" Margin="0 7 0 5" Click="ChangePasswordButton_Click">Change password</Button>
+                        <Button BorderThickness="0" Height="30" FontSize="16" Style="{DynamicResource RegButton}" Name="LogOffButton" Width="280" Margin="0 5 0 10" Click="LogOffButton_Click">Log off</Button>
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" FontSize="18" TextAlignment="Center" Name="AdminOptionsText" Visibility="Collapsed">Admin options</TextBlock>
+                        <Button BorderThickness="0" Height="30" FontSize="16" Style="{DynamicResource RegButton}" Name="AddNewAccountButton" Width="280" Margin="0 7 0 5" Click="AddNewAccountButton_Click" Visibility="Collapsed">Create new account</Button>
+                        <Button BorderThickness="0" Height="30" FontSize="16" Style="{DynamicResource RegButton}" Name="ManageAccountsButton" Width="280" Margin="0 5 0 5" Click="ManageAccountsButton_Click" Visibility="Collapsed">Manage accounts</Button>
+                    </StackPanel>
+                    <StackPanel Orientation="Vertical" Visibility="Visible">
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" FontSize="18" TextAlignment="Center">Modules</TextBlock>
+                        <Button IsEnabled="True" BorderThickness="0" Height="34" Style="{DynamicResource RegButton}" Name="PlannerButton" Width="280" Margin="0 7 0 5" Click="PlannerButton_Click">Open planner module</Button>
+                        <Border Name="PlannerBorder" Width="260" Margin="0 -5.5 0 0" CornerRadius="0 0 10 10" BorderBrush="#FF251D66" BorderThickness="2">
+                            <TextBlock TextWrapping="Wrap" TextAlignment="Center" Foreground="#FF251D66" FontSize="12" Style="{DynamicResource SmallPrettyText}">Planner module allows you to blah blah blah. Planner module allows you to blah blah blah</TextBlock>
+                        </Border>
+                        <Button IsEnabled="True" BorderThickness="0" Height="34" Style="{DynamicResource RegButton}" Name="DispatcherButton" Width="280" Margin="0 10 0 5" Click="DispatcherButton_Click">Open dispatcher module</Button>
+                        <Border Name="DispatcherBorder"  Width="260" Margin="0 -5.5 0 0" CornerRadius="0 0 10 10" BorderBrush="#FF251D66" BorderThickness="2">
+                            <TextBlock TextWrapping="Wrap" TextAlignment="Center" Foreground="#FF251D66" FontSize="12" Style="{DynamicResource SmallPrettyText}">Dispatcher module allows you to blah blah blah. Dispatcher module allows you to blah blah blah</TextBlock>
+                        </Border>
+                        <!--
+                    <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                        <TextBox Height="26" Name="LoginBox"></TextBox>
+                    </Border>
+
+                    <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Password</TextBlock>
+                    <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                        <PasswordBox Height="26" Name="PasswordBox"></PasswordBox>
+                    </Border>
+
+                    <CheckBox Style="{DynamicResource PrettyCheckbox}" Name="RememberMeCheckBox" Width="300" Margin="10 3 10 10">Remember me</CheckBox>
+                    <Button BorderThickness="0" Height="34" Style="{DynamicResource RegButton}" Name="LoginButton" Width="300" Margin="10 10 10 10" Click="LoginButton_Click">Log In</Button>
+                    -->
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <Grid Background="#33000000" Visibility="Hidden" Name="CreateNewAccountBackground">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="CreateNewAccountGrid">
+                <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Create new account</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 0">
+                    <StackPanel Orientation="Vertical" Visibility="Visible">
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Username</TextBlock>
+
+                        <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                            <TextBox Height="26" Name="CreateAccountName"></TextBox>
+                        </Border>
+
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Role</TextBlock>
+
+                        <ComboBox Name="CreateAccountRole"  Height="34" FontFamily="Century Gothic" Margin="10 3 10 10" FontSize="18" Foreground="{StaticResource PrettyBlueGradient}" Width="300" Style="{DynamicResource PrettyComboBox}" BorderBrush="{DynamicResource RoundedTextBoxGrad}" BorderThickness="3">
+                            <ComboBox.Background>
+                                <LinearGradientBrush EndPoint="0,1">
+                                    <GradientStop Color="#FFF0F0F0"/>
+                                    <GradientStop Color="#00E5E5E5" Offset="1"/>
+                                </LinearGradientBrush>
+                            </ComboBox.Background>
+                            <ComboBoxItem FontSize="16">Dispatcher</ComboBoxItem>
+                            <ComboBoxItem FontSize="16">Planner</ComboBoxItem>
+                            <ComboBoxItem FontSize="16">Full access</ComboBoxItem>
+                            <ComboBoxItem FontSize="16">Admin</ComboBoxItem>
+                        </ComboBox>
+
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Password</TextBlock>
+
+                        <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                            <TextBox Height="26" Name="CreateAccountGeneratedPassword"></TextBox>
+                        </Border>
+                        
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5 0 10">
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="CreateAccountBack" Click="CreateAccountBack_Click" Width="100">Back</Button>
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="CreateAccountSubmit" Click="CreateAccountSubmit_Click" Width="100">Submit</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+        
+        <Grid Background="#33000000" Visibility="Hidden" Name="ChangePasswordBackground">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="ChangePasswordGrid">
+                <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Change password</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 0">
+                    <StackPanel Orientation="Vertical" Visibility="Visible">
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Old password</TextBlock>
+
+                        <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                            <PasswordBox Height="26" Name="ChangePassword1Box"></PasswordBox>
+                        </Border>
+
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">New password</TextBlock>
+                        <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                            <PasswordBox Height="26" Name="ChangePassword2Box"></PasswordBox>
+                        </Border>
+
+                        <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Repeat new password</TextBlock>
+                        <Border Style="{DynamicResource PrettyBorder}" Width="300" Margin="10 3 10 10">
+                            <PasswordBox Height="26" Name="ChangePassword3Box"></PasswordBox>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5 0 10">
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="CloseChangePasswordButton" Width="100" Click="CloseChangePasswordButton_Click">Back</Button>
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="SubmitChangePasswordButton" Width="100" Click="SubmitChangePasswordButton_Click">Submit</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Grid Background="#33000000" Visibility="Hidden" Name="SuccessBackground">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="SuccessGrid">
+                <Border CornerRadius="20 20 0 0" Height="36" Background="{DynamicResource SuccessGradient}" ClipToBounds="True">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource PrettyText}" FontSize="26" Foreground="White">Success</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 0">
+                    <StackPanel Orientation="Vertical" Visibility="Visible">
+                        <TextBlock Name="SuccessText" Margin="0 0 0 10" Width="250" Style="{DynamicResource SmallPrettyText}" Foreground="{DynamicResource SuccessGradient}" FontSize="18" TextWrapping="Wrap">Error message good error message good error message</TextBlock>
+                        <Grid HorizontalAlignment="Center" Margin="0 5 0 10">
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource SuccessGradient}" Width="100" Name="SuccessOkayButton" Click="SuccessOkayButton_Click">Okay</Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+        
         <Grid Background="#33000000" Visibility="Hidden" Name="ErrorBackground">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="ErrorGrid">
                 <Border CornerRadius="20 20 0 0" Height="36" Background="{DynamicResource ErrorGradient}" ClipToBounds="True">
@@ -192,7 +383,6 @@
                     </StackPanel>
                 </Border>
             </StackPanel>
-
         </Grid>
     </Grid>
 </Window>

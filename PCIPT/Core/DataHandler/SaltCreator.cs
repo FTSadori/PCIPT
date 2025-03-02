@@ -16,12 +16,24 @@ namespace PCIPT.Core.DataHandler
             this.random = random;
         }
 
-        public string GetSalt(int length)
+        public string GetSalt(int length, bool onlyNumsAndDigits = false)
         {
             StringBuilder stringBuilder = new();
             for (int i = 0; i < length; i++)
             {
-                stringBuilder.Append((char)random.Next(32, 127));
+                if (onlyNumsAndDigits)
+                {
+                    char c;
+                    do
+                    {
+                        c = (char)random.Next(48, 122);
+                    } while (!Char.IsLetterOrDigit(c));
+                    stringBuilder.Append(c);
+                }
+                else
+                {
+                    stringBuilder.Append((char)random.Next(32, 127));
+                }
             }
             return stringBuilder.ToString();
         }

@@ -393,5 +393,10 @@ namespace PCIPT.Windows
                     break;
             }
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            new AuthorizationWindow().Show();
+        }
     }
 }
