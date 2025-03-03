@@ -18,6 +18,7 @@ using System.Windows.Threading;
 using PCIPT.Database.Dtos;
 using System.Data;
 using System.IO;
+using PCIPT.Windows.ObjectCreators;
 
 namespace PCIPT.Windows
 {
@@ -43,7 +44,13 @@ namespace PCIPT.Windows
             {
                 try
                 {
+                    DoCmd(delegate () {
+                        AuthorizationPanel.Visibility = Visibility.Hidden;
+                    });
                     DbContext.Connect("Server=WIN-00R1JQV3UDA\\SQLEXPRESS; Database=PCIPT; Trusted_connection=True; Encrypt=False");
+                    DoCmd(delegate () {
+                        AuthorizationPanel.Visibility = Visibility.Visible;
+                        });
                 }
                 catch (Exception)
                 {
@@ -108,6 +115,7 @@ namespace PCIPT.Windows
         }
 
         static string CurrentLogin = "";
+        static string CurrentRole = "";
 
         private void SwitchToAccountMenuWindow(string login)
         {
@@ -132,6 +140,8 @@ namespace PCIPT.Windows
             AddNewAccountButton.Visibility = Visibility.Collapsed;
             ManageAccountsButton.Visibility = Visibility.Collapsed;
 
+            CurrentRole = (string)account["role"];
+
             if ((string)account["role"] != "planner")
             {
                 DispatcherButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
@@ -144,7 +154,7 @@ namespace PCIPT.Windows
                 PlannerButton.IsEnabled = true;
                 PlannerBorder.Visibility = Visibility.Visible;
             }
-            if ((string)account["role"] == "admin")
+            if ((string)account["role"] == "admin" || (string)account["role"] == "superadmin")
             {
                 AdminOptionsText.Visibility = Visibility.Visible;
                 AddNewAccountButton.Visibility = Visibility.Visible;
@@ -344,7 +354,30 @@ namespace PCIPT.Windows
 
         private void ManageAccountsButton_Click(object sender, RoutedEventArgs e)
         {
+            AccountsStack.Children.Clear();
+            ManageAccountPanel.Visibility = Visibility.Visible;
+            try
+            {
+                var table = new SelectAllAccountEntriesCommand(DbContext.SqlConnection).Execute();
+                int i = 1;
+                foreach (DataRow row in table.Tables[0].Rows)
+                {
+                    AccountsStack.Children.Add(ManageAccountsRowCreator.GetObject(i++, (string)row["login"], (string)row["role"], ManageAccountClick, CurrentRole));
+                }
+            }
+            catch (Exception)
+            {
+                ShowError("Error while displaying data", false);
+            }
+        }
 
+        string CurrentAccountToManage = "";
+
+        private void ManageAccountClick(string name)
+        {
+            CurrentAccountToManage = name;
+            AccountOptionsLabel.Text = name + "'s options";
+            AccountOptionsPanel.Visibility = Visibility.Visible;
         }
 
         private void AddNewAccountButton_Click(object sender, RoutedEventArgs e)
@@ -408,6 +441,11 @@ namespace PCIPT.Windows
                 ShowError("Name can't be empty", false);
                 return;
             }
+            if (CreateAccountName.Text.Length > 32)
+            {
+                ShowError("Name can't have more than 32 symbols", false);
+                return;
+            }
 
             var account = new SelectAccountByLoginCommand(DbContext.SqlConnection).Execute(CreateAccountName.Text);
             if (account != null)
@@ -434,7 +472,71 @@ namespace PCIPT.Windows
                 return;
             }
             CreateNewAccountBackground.Visibility = Visibility.Hidden;
-            ShowSuccessMessage($"Account with login '{CreateAccountName.Text}', password '{CreateAccountGeneratedPassword.Text}' and role '{CreateAccountRole.Text.ToLower()}' has been created");
+            ShowSuccessMessage($"Account with login '{CreateAccountName.Text}' has been created. Authorization data has been copied to your clipboard");
+            Clipboard.SetText($"{CreateAccountName.Text} {CreateAccountGeneratedPassword.Text}");
+        }
+
+        private void ManageAccountsBack_Click(object sender, RoutedEventArgs e)
+        {
+            ManageAccountPanel.Visibility = Visibility.Hidden;
+        }
+
+        private void AccountOptionsResetPasswordButton_Click(object sender, RoutedEventArgs e)
+        {
+            string password = "";
+            try
+            {
+                password = new SaltCreator(new Random()).GetSalt(7, true);
+                password += (char)new Random().Next('0', '9');
+                string salt = new SaltCreator(new Random()).GetSalt(10);
+                string passhash = Hasher.GetHashString(password + salt);
+
+                if (new UpdatePasswordCommand(DbContext.SqlConnection).Execute(new UpdatePasswordDto(CurrentAccountToManage, passhash, salt)) != "")
+                {
+                    ShowError("Error while updating row entry", false);
+                }
+                Clipboard.SetText(password);
+            }
+            catch (Exception)
+            {
+                ShowError("Error while updating row entry", false);
+            }
+            AccountOptionsPanel.Visibility = Visibility.Hidden;
+            ShowSuccessMessage($"Password has been reset. New password has been copied to your clipboard");
+        }
+
+        private void AccountOptionsDeleteAccountButton_Click(object sender, RoutedEventArgs e)
+        {
+            YesNoPanel.Visibility = Visibility.Visible;
+        }
+
+        private void AccountOptionsCloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            AccountOptionsPanel.Visibility = Visibility.Hidden;
+        }
+
+        private void YesNoBack_Click(object sender, RoutedEventArgs e)
+        {
+            YesNoPanel.Visibility = Visibility.Hidden;
+        }
+
+        private void YesNoAgree_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (new DeleteAccountEntryCommand(DbContext.SqlConnection).Execute(CurrentAccountToManage) != "")
+                {
+                    ShowError("Error while deleting account", false);
+                }
+            }
+            catch (Exception)
+            {
+                ShowError("Error while deleting account", false);
+            }
+            YesNoPanel.Visibility = Visibility.Hidden;
+            AccountOptionsPanel.Visibility = Visibility.Hidden;
+            ShowSuccessMessage($"Account has been deleted");
+            ManageAccountsButton_Click(new object(), new RoutedEventArgs());
         }
     }
 }

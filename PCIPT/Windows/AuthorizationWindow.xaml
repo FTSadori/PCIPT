@@ -261,6 +261,77 @@
             </Border>
         </StackPanel>
 
+        <Grid Background="#33000000" Visibility="Hidden" Name="ManageAccountPanel">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="ManageAccountPanelGrid">
+                <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Manage accounts</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 15">
+                    <StackPanel Orientation="Vertical">
+                        <Border BorderThickness="0 0 0 3" BorderBrush="{DynamicResource RoundedTextBoxGrad}" Margin="0 0 17 0">
+                            <StackPanel Orientation="Horizontal">
+                                <Border BorderThickness="0 0 1 0" BorderBrush="{DynamicResource RoundedTextBoxGrad}" Width="30">
+                                    <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="5 0 0 0">№</TextBlock>
+                                </Border>
+                                <Border BorderThickness="0 0 1 0" BorderBrush="{DynamicResource RoundedTextBoxGrad}" Width="230">
+                                    <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="5 0 0 0">Login</TextBlock>
+                                </Border>
+                                <Border BorderThickness="0 0 1 0" BorderBrush="{DynamicResource RoundedTextBoxGrad}" Width="120">
+                                    <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="5 0 0 0">Role</TextBlock>
+                                </Border>
+                                <Border BorderThickness="0 0 0 0" BorderBrush="{DynamicResource RoundedTextBoxGrad}" Width="100">
+                                    <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="5 0 0 0">Option</TextBlock>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                        <ScrollViewer VerticalScrollBarVisibility="Visible" MinHeight="150" MaxHeight="270">
+                            <StackPanel Orientation="Vertical" Name="AccountsStack">
+                            </StackPanel>
+                        </ScrollViewer>
+                        <Button Margin="0 10 0 0" BorderThickness="0" FontSize="16" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="ManageAccountsBack" Click="ManageAccountsBack_Click" Width="100">Back</Button>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Grid Background="#33000000" Visibility="Hidden" Name="AccountOptionsPanel">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="AccountOptionsGrid">
+                <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Name="AccountOptionsLabel" Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Users's options</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 15">
+                    <StackPanel Orientation="Vertical" Visibility="Visible">
+                        <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="AccountOptionsResetPasswordButton" Width="200" Click="AccountOptionsResetPasswordButton_Click">Reset password</Button>
+                        <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Name="AccountOptionsDeleteAccountButton" Width="200" Click="AccountOptionsDeleteAccountButton_Click">Delete account</Button>
+                        <Button BorderThickness="0" Margin="10 10 10 0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="AccountOptionsCloseButton" Width="100" Click="AccountOptionsCloseButton_Click">Back</Button>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <Grid Background="#33000000" Visibility="Hidden" Name="YesNoPanel">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="YesNoGrid">
+                <Border CornerRadius="5" Background="White" Padding="15 15 15 15" Width="200">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Margin="0 0 0 10" Style="{DynamicResource SmallPrettyText}" Foreground="{DynamicResource RoundedTextBoxGrad}" FontSize="16" TextWrapping="Wrap">Delete Admin's account?</TextBlock>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="YesNoBack" Width="70" Click="YesNoBack_Click">Back</Button>
+                            <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Name="YesNoAgree" Width="70" Click="YesNoAgree_Click">Delete</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+
         <Grid Background="#33000000" Visibility="Hidden" Name="CreateNewAccountBackground">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="CreateNewAccountGrid">
                 <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
@@ -290,7 +361,6 @@
                             <ComboBoxItem FontSize="16">Dispatcher</ComboBoxItem>
                             <ComboBoxItem FontSize="16">Planner</ComboBoxItem>
                             <ComboBoxItem FontSize="16">Full access</ComboBoxItem>
-                            <ComboBoxItem FontSize="16">Admin</ComboBoxItem>
                         </ComboBox>
 
                         <TextBlock Width="300" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Password</TextBlock>
