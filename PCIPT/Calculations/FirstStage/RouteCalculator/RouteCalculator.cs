@@ -56,6 +56,7 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
         {
             routeDtos = routes.ToList();
             nodeDtos = nodes.ToList();
+            savedRoutes = new();
         }
 
         private static Path? DijkstraAlgorithm(int startPointId, int endPointId)

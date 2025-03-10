@@ -52,7 +52,7 @@ namespace PCIPT.Windows
                         AuthorizationPanel.Visibility = Visibility.Visible;
                         });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     DoCmd(delegate () {
                         ShowError("Connection error", true);
