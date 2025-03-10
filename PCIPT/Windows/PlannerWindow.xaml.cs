@@ -29,12 +29,15 @@ namespace PCIPT.Windows
     /// </summary>
     public partial class PlannerWindow : Window
     {
-        public PlannerWindow()
+        public PlannerWindow(DbContext dbContext)
         {
             InitializeComponent();
 
+            DbContext = dbContext;
             This = this;
         }
+
+        DbContext DbContext { get; set; }
 
         public static PlannerWindow This;
 
@@ -133,7 +136,7 @@ namespace PCIPT.Windows
 
         private void InputDataButton_Click(object sender, RoutedEventArgs e)
         {
-            new PlannerImportWindow().Show();
+            new PlannerImportWindow(DbContext).Show();
         }
     }
 }

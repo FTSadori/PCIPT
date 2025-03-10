@@ -312,7 +312,7 @@ namespace PCIPT.Windows
 
         private void PlannerButton_Click(object sender, RoutedEventArgs e)
         {
-            var w = new PlannerWindow();
+            var w = new PlannerWindow(DbContext);
             w.Show();
             Close();
         }

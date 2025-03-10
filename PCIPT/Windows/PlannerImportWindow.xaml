@@ -53,42 +53,42 @@
                         <StackPanel Orientation="Vertical" Margin="5 0 5 0">
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Cost weights</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator1" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Fuel vehicles</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator2" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Electric vehicles</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator3" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Routes data</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator4" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="5 0 5 0">
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Cargoes data</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator5" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Cargo turnover points</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator6" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Vehicle types</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator7" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" Margin="0 5 0 0">
                                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="175" TextAlignment="Right" Foreground="White" Margin="0 0 5 0">Nodes data</TextBlock>
-                                <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
+                                <TextBlock Name="Indicator8" Style="{DynamicResource PrettyText}" FontSize="16" Width="70" TextAlignment="Right" Foreground="White" Margin="0 0 5 0" Opacity="0.7">Empty</TextBlock>
                             </StackPanel>
                         </StackPanel>
 
                     </StackPanel>
-                    <Button Style="{StaticResource RegButton}" Margin="5" Height="24" BorderThickness="1" Background="White" Foreground="{StaticResource RoundedTextBoxGrad}" Width="300" FontSize="16">Import from connected database</Button>
+                    <Button Name="ImportDatabaseButton" Click="ImportDatabaseButton_Click" Style="{StaticResource RegButton}" Margin="5" Height="24" BorderThickness="1" Background="White" Foreground="{StaticResource RoundedTextBoxGrad}" Width="300" FontSize="16">Import from connected database</Button>
                 </StackPanel>
             </Border>
             <Border Visibility="Visible" Name="BorderCsv" Style="{StaticResource PrettyBorder}" Margin="0 -3 0 0" Background="{StaticResource RoundedTextBoxGrad}" BorderThickness="0" Width="560">
