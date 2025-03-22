@@ -6,8 +6,14 @@ using PCIPT.Calculations.FirstStage.LossByVehicle;
 using PCIPT.Calculations.FirstStage.RouteFinder;
 using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
 using PCIPT.Core.DataHandler;
+using PCIPT.Dtos.Cargoes;
+using PCIPT.Dtos.CargoTurnoverPoints;
 using PCIPT.Dtos.CostWeight;
+using PCIPT.Dtos.Node;
+using PCIPT.Dtos.Routes;
 using PCIPT.Dtos.Vehicles;
+using PCIPT.Dtos.VehicleTypes;
+using PCIPT.Windows.ObjectCreators;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +33,7 @@ namespace PCIPT.Windows
     /// <summary>
     /// Логика взаимодействия для PlannerWindow.xaml
     /// </summary>
+
     public partial class PlannerWindow : Window
     {
         public PlannerWindow(DbContext dbContext)
@@ -35,11 +42,32 @@ namespace PCIPT.Windows
 
             DbContext = dbContext;
             This = this;
+
+            //CurrentDataGrid.ItemsSource = people;
+            AbleOptionButtons(false);
         }
 
         DbContext DbContext { get; set; }
 
         public static PlannerWindow This;
+
+        public int currentId = -1;
+        public List<System.Collections.IEnumerable> tables = new();
+        public List<string> tableNames = new();
+
+        public void ShowTable(int id)
+        {
+            currentId = id;
+            CurrentTableText.Text = $"Current: {tableNames[id]}";
+            CurrentDataGrid.ItemsSource = tables[id];
+        }
+
+        public void ClearTable()
+        {
+            currentId = -1;
+            CurrentTableText.Text = $"Current: Empty";
+            CurrentDataGrid.ItemsSource = null;
+        }
 
         public void PerformPlanning()
         {
@@ -49,13 +77,78 @@ namespace PCIPT.Windows
                 string message2 = CalculatePathes();
                 if (message2 == "")
                 {
-                    TestMessage.Text = "Success";
+                    tables = new()
+                    {
+                        PlannerImportWindow.costWeightDtos,
+                        PlannerImportWindow.fuelVehicleDtos,
+                        PlannerImportWindow.electricVehicleDtos,
+                        PlannerImportWindow.routeDtos,
+                        PlannerImportWindow.cargoDtos,
+                        PlannerImportWindow.cargoTurnoverPointDtos,
+                        PlannerImportWindow.vehicleTypeDtos,
+                        PlannerImportWindow.nodeDtos,
+                        vehicleCosts,
+                        testPaths,
+                        distributedTasks,
+                        finalCost,
+                    };
+                    tableNames = new()
+                    {
+                        "CostWeights.csv",
+                        "FuelVehicles.csv",
+                        "ElectricVehicles.csv",
+                        "Routes.csv",
+                        "Cargoes.csv",
+                        "CargoTurnoverPoints.csv",
+                        "VehicleTypes.csv",
+                        "Nodes.csv",
+                        "VehicleCosts.csv",
+                        "TextPathes.csv",
+                        "DistributedTasks.csv",
+                        "FinalConsts.csv",
+                    };
+
+                    AbleOptionButtons(true);
+
+                    TablesStack.Children.Clear();
+                    for (int i = 0; i < tableNames.Count; ++i)
+                    {
+                        TablesStack.Children.Add(PlannerTableRowObjectCreator.GetObject($"{i + 1}. {tableNames[i]}", i, ShowTable));
+                    }
                 }
-                else
-                    TestMessage.Text = message2;
+            }
+        }
+
+        public void AbleOptionButtons(bool isDataPresent)
+        {
+            if (isDataPresent)
+            {
+                InputDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+                ExportDataButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+                RecalculateButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+                ClearDataButton.SetResourceReference(BackgroundProperty, "ErrorGradient");
+
+                AddRow.Visibility = Visibility.Visible;
+
+                InputDataButton.IsEnabled = false;
+                ExportDataButton.IsEnabled = true;
+                RecalculateButton.IsEnabled = true;
+                ClearDataButton.IsEnabled = true;
             }
             else
-                TestMessage.Text = message1;
+            {
+                InputDataButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+                ExportDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+                RecalculateButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+                ClearDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                AddRow.Visibility = Visibility.Hidden;
+
+                InputDataButton.IsEnabled = true;
+                ExportDataButton.IsEnabled = false;
+                RecalculateButton.IsEnabled = false;
+                ClearDataButton.IsEnabled = false;
+            }
         }
 
         private string PrepareDataForPlanning()
@@ -134,9 +227,59 @@ namespace PCIPT.Windows
             new AuthorizationWindow().Show();
         }
 
+        private void ExportDataButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void RecalculateButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClearTable();
+            PerformPlanning();
+        }
+
+        private void ClearDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult result = MessageBox.Show(
+                "Do you want to clear data?",
+                "Confirmation",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
+            if (result == MessageBoxResult.Yes)
+            {
+                TablesStack.Children.Clear();
+                ClearTable();
+                AbleOptionButtons(false);
+            }
+        }
+
+        private void AddRow_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentId == -1) return;
+            switch (currentId)
+            {
+                case 0: PlannerImportWindow.costWeightDtos.Add(new CostWeightDto("", 1)); break;
+                case 1: PlannerImportWindow.fuelVehicleDtos.Add(new FuelVehicleDto("", "", 0, 0, 0, 0, 0, 0, 0, 0, "", 0, 0)); break;
+                case 2: PlannerImportWindow.electricVehicleDtos.Add(new ElectricVehicleDto()); break;
+                case 3: PlannerImportWindow.routeDtos.Add(new RouteDto(0, 0, 0, 0)); break;
+                case 4: PlannerImportWindow.cargoDtos.Add(new CargoDto(0,"","",0)); break;
+                case 5: PlannerImportWindow.cargoTurnoverPointDtos.Add(new CargoTurnoverPointDto(0,0,0,0,0)); break;
+                case 6: PlannerImportWindow.vehicleTypeDtos.Add(new VehicleTypeDto("", "")); break;
+                case 7: PlannerImportWindow.nodeDtos.Add(new NodeDto(0, "")); break;
+                case 8: vehicleCosts.Add(new CostTableRowEntity("",0,0,0,0,0,0)); break;
+                case 9: testPaths.Add(new TestPath(0,0,0)); break;
+                case 10: distributedTasks.Add(new VehicleByRoutesRow("",0,0,0,0,0,0,0,0)); break;
+                case 11: finalCost.Add(new FinalCostRowEntity("",0,0,0,0,0,0,0,0,0)); break;
+            }
+            CurrentDataGrid.ItemsSource = null;
+            CurrentDataGrid.ItemsSource = tables[currentId];
+        }
+
         private void InputDataButton_Click(object sender, RoutedEventArgs e)
         {
-            new PlannerImportWindow(DbContext).Show();
+            new PlannerImportWindow(DbContext).ShowDialog();
         }
     }
 }

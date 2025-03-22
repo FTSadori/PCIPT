@@ -6,8 +6,95 @@
         xmlns:local="clr-namespace:PCIPT.Windows"
         mc:Ignorable="d"
         Title="PCIPT System: Planner window" Height="450" Width="800" Closing="Window_Closing">
-    <Grid>
-        <Button Style="{DynamicResource RegButton}" Height="40" Width="300" Name="InputDataButton" Click="InputDataButton_Click">Import</Button>
-        <TextBlock Style="{StaticResource PrettyText}" Margin="0 -100 0 0" FontSize="24" Name="TestMessage"></TextBlock>
+    <Grid Background="#FF030323">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="0.9*"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Tables</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="1" CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">
+                <ScrollViewer>
+                    <StackPanel Orientation="Vertical" Visibility="Visible" Name="TablesStack">
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Operations</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="2" CornerRadius="0 0 5 5" Background="White" Padding="5">
+                <StackPanel Orientation="Vertical" Visibility="Visible" Margin="0 0 0 20">
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Name="InputDataButton" Click="InputDataButton_Click" Width="160">Import data</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource DisableGradient}" Name="ExportDataButton" Click="ExportDataButton_Click" Width="160">Export data</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource DisableGradient}" Name="RecalculateButton" Click="RecalculateButton_Click" Width="160">Recalculate</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource DisableGradient}" Name="ClearDataButton" Click="ClearDataButton_Click" Width="160">Clear data</Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="4 0 0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White" Name="CurrentTableText">Current: Empty</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="1"  CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">
+                <Grid>
+                    <DataGrid Name="CurrentDataGrid"
+                                  AutoGenerateColumns="True"
+                                  CanUserAddRows="True"
+                                  CanUserDeleteRows="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="False"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="#FF030323"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                    </DataGrid>
+                    <Button Name="AddRow" Click="AddRow_Click" Margin="8" Style="{StaticResource RegButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="24" Height="24" BorderThickness="0">+</Button>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
