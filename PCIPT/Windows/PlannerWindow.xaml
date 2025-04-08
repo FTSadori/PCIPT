@@ -93,6 +93,11 @@
                               >
                     </DataGrid>
                     <Button Name="AddRow" Click="AddRow_Click" Margin="8" Style="{StaticResource RegButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="24" Height="24" BorderThickness="0">+</Button>
+                    <Button Name="ExportCurrentTable" Click="ExportCurrentTable_Click" Margin="8 8 40 8" Style="{StaticResource RegButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="24" Height="24" BorderThickness="0">🖫</Button>
+
+                    <TextBlock Name="ErrorText" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource SmallPrettyText}" Foreground="Red">
+                        
+                    </TextBlock>
                 </Grid>
             </Border>
         </Grid>

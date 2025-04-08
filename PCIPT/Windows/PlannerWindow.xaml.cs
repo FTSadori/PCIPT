@@ -27,6 +27,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Forms;
+using System.IO;
 
 namespace PCIPT.Windows
 {
@@ -115,7 +117,17 @@ namespace PCIPT.Windows
                     {
                         TablesStack.Children.Add(PlannerTableRowObjectCreator.GetObject($"{i + 1}. {tableNames[i]}", i, ShowTable));
                     }
+
+                    ErrorText.Text = "";
                 }
+                else
+                {
+                    ErrorText.Text = "Error while " + message2;
+                }
+            }
+            else
+            {
+                ErrorText.Text = "Error while " + message1;
             }
         }
 
@@ -129,6 +141,7 @@ namespace PCIPT.Windows
                 ClearDataButton.SetResourceReference(BackgroundProperty, "ErrorGradient");
 
                 AddRow.Visibility = Visibility.Visible;
+                ExportCurrentTable.Visibility = Visibility.Visible;
 
                 InputDataButton.IsEnabled = false;
                 ExportDataButton.IsEnabled = true;
@@ -143,6 +156,7 @@ namespace PCIPT.Windows
                 ClearDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
 
                 AddRow.Visibility = Visibility.Hidden;
+                ExportCurrentTable.Visibility = Visibility.Hidden;
 
                 InputDataButton.IsEnabled = true;
                 ExportDataButton.IsEnabled = false;
@@ -229,7 +243,14 @@ namespace PCIPT.Windows
 
         private void ExportDataButton_Click(object sender, RoutedEventArgs e)
         {
+            string selectedPath = SelectPathToExport();
 
+            if (selectedPath == "") return;
+
+            for (int i = 0; i < tables.Count; ++i)
+            {
+                Export(i, selectedPath);
+            }
         }
 
         private void RecalculateButton_Click(object sender, RoutedEventArgs e)
@@ -240,7 +261,7 @@ namespace PCIPT.Windows
 
         private void ClearDataButton_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult result = MessageBox.Show(
+            MessageBoxResult result = System.Windows.MessageBox.Show(
                 "Do you want to clear data?",
                 "Confirmation",
                 MessageBoxButton.YesNo,
@@ -275,6 +296,54 @@ namespace PCIPT.Windows
             }
             CurrentDataGrid.ItemsSource = null;
             CurrentDataGrid.ItemsSource = tables[currentId];
+        }
+
+        private void ExportCurrentTable_Click(object sender, RoutedEventArgs e)
+        {
+            string selectedPath = SelectPathToExport();
+
+            if (selectedPath == "") return;
+
+            Export(currentId, selectedPath);
+        }
+
+        private string SelectPathToExport()
+        {
+            string selectedPath = "";
+
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "Оберіть папку для експорту";
+                dialog.UseDescriptionForTitle = true; // Працює на нових Windows
+                dialog.ShowNewFolderButton = true;
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    selectedPath = dialog.SelectedPath;
+                }
+            }
+
+            return selectedPath;
+        }
+
+        private void Export(int tableId, string selectedPath)
+        {
+            if (tableId == -1) return;
+            switch (tableId)
+            {
+                case 0: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.costWeightDtos); break;
+                case 1: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.fuelVehicleDtos); break;
+                case 2: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.electricVehicleDtos); break;
+                case 3: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.routeDtos); break;
+                case 4: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.cargoDtos); break;
+                case 5: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.cargoTurnoverPointDtos); break;
+                case 6: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.vehicleTypeDtos); break;
+                case 7: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.nodeDtos); break;
+                case 8: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], vehicleCosts); break;
+                case 9: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], testPaths); break;
+                case 10: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], distributedTasks); break;
+                case 11: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], finalCost); break;
+            }
         }
 
         private void InputDataButton_Click(object sender, RoutedEventArgs e)

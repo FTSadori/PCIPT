@@ -163,8 +163,8 @@ namespace PCIPT.Windows
                             break;
                     }
 
-                    sender.Foreground = Brushes.Green;
-                    sender.BorderBrush = Brushes.Green;
+                    sender.Foreground = Brushes.LightGreen;
+                    sender.BorderBrush = Brushes.LightGreen;
                 }
                 catch (Exception)
                 {
@@ -225,8 +225,8 @@ namespace PCIPT.Windows
             try { timeFund = float.Parse(DailyTimeFundTextBox.Text); }
             catch (Exception) { DailyTimeFundTextBox.Foreground = Brushes.Red; error = true; }
 
-            try { maxDailyCargo = float.Parse(MaxDailyCargoTextBox.Text); }
-            catch (Exception) { MaxDailyCargoTextBox.Foreground = Brushes.Red; error = true; }
+            //try { maxDailyCargo = float.Parse(MaxDailyCargoTextBox.Text); }
+            //catch (Exception) { MaxDailyCargoTextBox.Foreground = Brushes.Red; error = true; }
 
             if (error) return;
 
@@ -246,14 +246,14 @@ namespace PCIPT.Windows
                 costWeightDtos = null;
                 costWeightDtos = PlannerDataFromDatabaseConverter.ToCostWeight(new SelectAllCostWeightsCommand(DbContext.SqlConnection).Execute());
                 Indicator1.Text = "Good";
-                Indicator1.Foreground = Brushes.Green;
+                Indicator1.Foreground = Brushes.LightGreen;
             } catch(Exception) { Indicator1.Text = "Error"; Indicator1.Foreground = Brushes.Red; }
             try
             {
                 fuelVehicleDtos = null;
                 fuelVehicleDtos = PlannerDataFromDatabaseConverter.ToFuelVehicles(new SelectAllFuelVehiclesCommand(DbContext.SqlConnection).Execute());
                 Indicator2.Text = "Good";
-                Indicator2.Foreground = Brushes.Green;
+                Indicator2.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator2.Text = "Error"; Indicator2.Foreground = Brushes.Red; }
             try
@@ -261,7 +261,7 @@ namespace PCIPT.Windows
                 electricVehicleDtos = null;
                 electricVehicleDtos = PlannerDataFromDatabaseConverter.ToElectricVehicles(new SelectAllElectricVehiclesCommand(DbContext.SqlConnection).Execute());
                 Indicator3.Text = "Good";
-                Indicator3.Foreground = Brushes.Green;
+                Indicator3.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator3.Text = "Error"; Indicator3.Foreground = Brushes.Red; }
             try
@@ -269,7 +269,7 @@ namespace PCIPT.Windows
                 routeDtos = null;
                 routeDtos = PlannerDataFromDatabaseConverter.ToRoutes(new SelectAllRoutesCommand(DbContext.SqlConnection).Execute());
                 Indicator4.Text = "Good";
-                Indicator4.Foreground = Brushes.Green;
+                Indicator4.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator4.Text = "Error"; Indicator4.Foreground = Brushes.Red; }
             try
@@ -277,7 +277,7 @@ namespace PCIPT.Windows
                 cargoDtos = null;
                 cargoDtos = PlannerDataFromDatabaseConverter.ToCargoes(new SelectAllCargoesCommand(DbContext.SqlConnection).Execute());
                 Indicator5.Text = "Good";
-                Indicator5.Foreground = Brushes.Green;
+                Indicator5.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator5.Text = "Error"; Indicator5.Foreground = Brushes.Red; }
             try
@@ -285,7 +285,7 @@ namespace PCIPT.Windows
                 cargoTurnoverPointDtos = null;
                 cargoTurnoverPointDtos = PlannerDataFromDatabaseConverter.ToCargoTurnoverPoints(new SelectAllCargoTurnoverPointsCommand(DbContext.SqlConnection).Execute());
                 Indicator6.Text = "Good";
-                Indicator6.Foreground = Brushes.Green;
+                Indicator6.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator6.Text = "Error"; Indicator6.Foreground = Brushes.Red; }
             try
@@ -293,7 +293,7 @@ namespace PCIPT.Windows
                 vehicleTypeDtos = null;
                 vehicleTypeDtos = PlannerDataFromDatabaseConverter.ToVehicleTypes(new SelectAllVehicleTypesCommand(DbContext.SqlConnection).Execute());
                 Indicator7.Text = "Good";
-                Indicator7.Foreground = Brushes.Green;
+                Indicator7.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator7.Text = "Error"; Indicator7.Foreground = Brushes.Red; }
             try
@@ -301,7 +301,7 @@ namespace PCIPT.Windows
                 nodeDtos = null;
                 nodeDtos = PlannerDataFromDatabaseConverter.ToNodes(new SelectAllNodesCommand(DbContext.SqlConnection).Execute());
                 Indicator8.Text = "Good";
-                Indicator8.Foreground = Brushes.Green;
+                Indicator8.Foreground = Brushes.LightGreen;
             }
             catch (Exception) { Indicator8.Text = "Error"; Indicator8.Foreground = Brushes.Red; }
 

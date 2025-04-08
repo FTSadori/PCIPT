@@ -19,10 +19,13 @@ namespace PCIPT.Calculations.FirstStage.VehicleInRoute
     {
         private static float CalculateDailyCargoTurnover(float thisCargoTurnover, float fullCargoTurnover, float workingDays, float maxDailyCargo)
         {
+            /*
             float Qav = fullCargoTurnover / workingDays;
             float K = maxDailyCargo / Qav;
             float Qdaily = thisCargoTurnover / workingDays * K;
             return Qdaily;
+            */
+            return thisCargoTurnover / workingDays;
         }
 
         public static List<VehicleInRouteStats> CalculateVehicleStats(List<VehicleDto> vehicles, List<VehicleTypeDto> vehicleTypes, 

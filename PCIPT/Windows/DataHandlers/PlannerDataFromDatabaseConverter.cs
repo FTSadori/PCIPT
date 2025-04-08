@@ -22,7 +22,7 @@ namespace PCIPT.Windows.DataHandlers
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                list.Add(new CostWeightDto((string)row["name"], (float)row["weight"]));
+                list.Add(new CostWeightDto((string)row["name"], (float)row["cweight"]));
             }
 
             return list;
@@ -34,7 +34,7 @@ namespace PCIPT.Windows.DataHandlers
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                list.Add(new ElectricVehicleDto((string)row["name"], (string)row["type"], (float)row["loadcapacity"], 
+                list.Add(new ElectricVehicleDto((string)row["name"], (string)row["vtype"], (float)row["loadcapacity"], 
                     (float)row["speedwithload"], (float)row["speedwithoutload"], (float)row["loadtime"], (float)row["hoil"], 
                     (float)row["toil"], (float)row["soil"], (int)row["maxquantity"], (float)row["baseelectricity"]));
             }
@@ -48,7 +48,7 @@ namespace PCIPT.Windows.DataHandlers
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                list.Add(new FuelVehicleDto((string)row["name"], (string)row["type"], (float)row["loadcapacity"],
+                list.Add(new FuelVehicleDto((string)row["name"], (string)row["vtype"], (float)row["loadcapacity"],
                     (float)row["speedwithload"], (float)row["speedwithoutload"], (float)row["loadtime"], (float)row["hoil"],
                     (float)row["toil"], (float)row["soil"], (int)row["maxquantity"], (string)row["fueltype"], (float)row["fuelconsumption"], (float)row["moil"]));
             }
@@ -74,7 +74,7 @@ namespace PCIPT.Windows.DataHandlers
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                list.Add(new CargoDto((int)row["code"], (string)row["name"], (string)row["type"], (float)row["utilizationrate"]));
+                list.Add(new CargoDto((int)row["code"], (string)row["name"], (string)row["ctype"], (float)row["utilizationrate"]));
             }
 
             return list;
@@ -98,7 +98,7 @@ namespace PCIPT.Windows.DataHandlers
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                list.Add(new VehicleTypeDto((string)row["vehicletype"], (string)row["cargotypes"]));
+                list.Add(new VehicleTypeDto((string)row["vehicletype"], (string)row["cargotype"]));
             }
 
             return list;

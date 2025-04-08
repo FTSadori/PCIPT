@@ -22,7 +22,7 @@ namespace PCIPT.Database.Commands
         {
             try
             {
-                SqlCommand cmd = new("SELECT * FROM Routes", SqlConnection);
+                SqlCommand cmd = new("SELECT * FROM RoutesData", SqlConnection);
                 DataSet data = new();
                 SqlDataAdapter adapter = new(cmd);
                 adapter.Fill(data);
