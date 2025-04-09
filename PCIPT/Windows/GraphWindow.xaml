@@ -6,23 +6,60 @@
         xmlns:local="clr-namespace:PCIPT.Windows"
         mc:Ignorable="d"
         Title="GraphWindow" Height="450" Width="800" KeyDown="Window_KeyDown" SizeChanged="Window_SizeChanged" Closing="Window_Closing">
-    <Grid>
+    <Grid Background="#FF030323">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="0.9*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
 
-        <Canvas Name="GraphCanvas" Grid.RowSpan="2" Grid.Column="1">
-        </Canvas>
+        <Grid Grid.Column="1" Grid.Row="0" Grid.ColumnSpan="2" Grid.RowSpan="2" Margin="4 0 0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="1"  CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5" ClipToBounds="True">
+                <Grid>
+                    <Canvas Name="GraphCanvas">
+                    </Canvas>
 
-        <Canvas Name="VehiclesGraphCanvas" Grid.RowSpan="2" Grid.Column="1">
-        </Canvas>
+                    <Canvas Name="VehiclesGraphCanvas">
+                    </Canvas>
+                </Grid>
+            </Border>
+            <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White" Name="CurrentTableText">Current: Empty</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
 
-        <Grid Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="60" Height="80">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" CornerRadius="20 20 0 0" Height="40" Background="{StaticResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Tables</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="1" CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">
+                <ScrollViewer>
+                    <StackPanel Orientation="Vertical" Visibility="Visible" Name="TablesStack">
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="90" Height="120">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -35,17 +72,43 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <Button Grid.Column="1" Grid.Row="0" Click="Up_Click">▲</Button>
-            <Button Grid.Column="0" Grid.Row="1" Click="Left_Click">◄</Button>
-            <Button Grid.Column="2" Grid.Row="1" Click="Right_Click">►</Button>
-            <Button Grid.Column="1" Grid.Row="2" Click="Down_Click">▼</Button>
-            <Button Grid.Column="1" Grid.Row="1" Click="SetDefault_Click">○</Button>
-            <StackPanel Grid.ColumnSpan="3" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Grid.Column="0" Grid.Row="1" Width="20" Click="SizeMinus_Click">-</Button>
-                <Button Grid.Column="2" Grid.Row="1" Width="20" Click="SizePlus_Click">+</Button>
-            </StackPanel>
+            <Button Style="{StaticResource RegButton}" Margin="0" Padding="0 2 0 3" BorderThickness="0" FontSize="12" Grid.Column="1" Grid.Row="0" Click="Up_Click">▲</Button>
+            <Button Style="{StaticResource RegButton}" Margin="0" Padding="-1 -1 0 0" BorderThickness="0" FontSize="12" Grid.Column="0" Grid.Row="1" Click="Left_Click">◄</Button>
+            <Button Style="{StaticResource RegButton}" Margin="0" Padding="1 2 0 3" BorderThickness="0" FontSize="12" Grid.Column="2" Grid.Row="1" Click="Right_Click">►</Button>
+            <Button Style="{StaticResource RegButton}" Margin="0" Padding="0 -3 0 -3" BorderThickness="0" FontSize="12" Grid.Column="1" Grid.Row="2" Click="Down_Click">▼</Button>
+            <Button Style="{StaticResource RegButton}" Margin="1" Padding="0 1 0 3" BorderThickness="0" FontSize="12" Grid.Column="1" Grid.Row="1" Click="SetDefault_Click">○</Button>
+            <Border Grid.ColumnSpan="3" Grid.Row="3" HorizontalAlignment="Center" Style="{StaticResource PrettyBorder}" BorderThickness="0" Background="{StaticResource PrettyBlueGradient}" Margin="0,2,0,2" Width="52">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource RegButton}" Margin="3" Padding="0 -7 0 -3" BorderThickness="0" FontSize="20" Background="Transparent" Foreground="White"
+                        Grid.Column="0" Grid.Row="1" Width="20" Click="SizeMinus_Click">-</Button>
+                    <Button Style="{StaticResource RegButton}" Margin="3" Padding="0 -4 0 -3" BorderThickness="0" FontSize="16" Background="Transparent" Foreground="White"
+                        Grid.Column="2" Grid.Row="1" Width="20" Click="SizePlus_Click">+</Button>
+                </StackPanel>
+            </Border>
         </Grid>
 
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                <Grid>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Operations</TextBlock>
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="2" CornerRadius="0 0 5 5" Background="White" Padding="5">
+                <StackPanel Orientation="Vertical" Visibility="Visible" Margin="0 0 0 20">
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Import data</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource DisableGradient}" Width="160">Clear data</Button>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!--
         <TextBlock Grid.RowSpan="2" Background="LightGray"></TextBlock>
         <StackPanel Orientation="Vertical" Margin="10" Background="White">
             <TextBlock FontSize="16" Margin="0 0 0 5">Legend</TextBlock>
@@ -57,5 +120,6 @@
             <StackPanel Orientation="Vertical" CanHorizontallyScroll="True">
             </StackPanel>
         </StackPanel>
+        -->
     </Grid>
 </Window>
