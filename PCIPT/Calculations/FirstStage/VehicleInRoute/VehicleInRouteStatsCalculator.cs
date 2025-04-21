@@ -17,7 +17,7 @@ namespace PCIPT.Calculations.FirstStage.VehicleInRoute
 {
     public sealed class VehicleInRouteStatsCalculator
     {
-        private static float CalculateDailyCargoTurnover(float thisCargoTurnover, float fullCargoTurnover, float workingDays, float maxDailyCargo)
+        private static float CalculateDailyCargoTurnover(float thisCargoTurnover, float fullCargoTurnover, float workingDays)
         {
             /*
             float Qav = fullCargoTurnover / workingDays;
@@ -31,9 +31,9 @@ namespace PCIPT.Calculations.FirstStage.VehicleInRoute
         public static List<VehicleInRouteStats> CalculateVehicleStats(List<VehicleDto> vehicles, List<VehicleTypeDto> vehicleTypes, 
             List<CostTableRowEntity> costTable,
             CargoTurnoverPointDto point, CargoDto cargo, float distance,
-            float dailyTimeFund, float fullCargoTurnover, float workingDays, float maxDailyCargo)
+            float dailyTimeFund, float fullCargoTurnover, float workingDays)
         {
-            float Qdaily = CalculateDailyCargoTurnover(point.OutgoingCargo, fullCargoTurnover, workingDays, maxDailyCargo);
+            float Qdaily = CalculateDailyCargoTurnover(point.OutgoingCargo, fullCargoTurnover, workingDays);
 
             var vehicleTable = new List<VehicleInRouteStats>();
 

@@ -24,7 +24,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
         public static Dictionary<PointFilesData, List<VehicleInRouteStats>> CalculateVehicleStatsByPoints(
             List<CargoTurnoverPointDto> points, List<RouteDto> routes, List<CargoDto> cargoes, List<VehicleDto> vehicles,
             List<VehicleTypeDto> vehicleTypes, List<CostTableRowEntity> costTable,
-            float DAILY_TIME_FUND, int WORKING_DAYS, float MAX_DAILY_CARGO
+            float DAILY_TIME_FUND, int WORKING_DAYS
             )
         {
             var totalMasses = CargoTurnoverCalculator.GetTotalMassForEachCargo(points);
@@ -40,7 +40,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                     continue;
 
                 var rn = VehicleInRouteStatsCalculator.CalculateVehicleStats(vehicles, vehicleTypes, costTable, point, cargo,
-                    distance, DAILY_TIME_FUND, fullMass, WORKING_DAYS, MAX_DAILY_CARGO).OrderBy(o => o.TotalCost).ToList();
+                    distance, DAILY_TIME_FUND, fullMass, WORKING_DAYS).OrderBy(o => o.TotalCost).ToList();
 
                 string filename = point.SourceId + "_" + point.DestinationId + "___" + cargo.Name + ".csv";
                 vehicleInRoutes[new PointFilesData(point.Id, filename, distance, point.SourceId, point.DestinationId)] = rn;

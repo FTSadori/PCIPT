@@ -59,8 +59,6 @@ namespace PCIPT.Windows
             var records2 = CsvHandler.GetAllFromFile<ElectricVehicleDto>("ElectricVehicles.csv");
             foreach (var record in records2)
                 Vehicles.Add(record);
-
-
         }
 
         public static void DoCmd(ThreadStart th)
@@ -88,6 +86,18 @@ namespace PCIPT.Windows
         private bool Init = false;
         private double TotalShiftHeight = 0;
         private double TotalShiftWidth = 0;
+
+        public GraphWindow(DbContext dbContext)
+        {
+            InitializeComponent();
+
+            DbContext = dbContext;
+            //This = this;
+
+            //AbleOptionButtons(false);
+        }
+
+        DbContext DbContext { get; set; }
 
         private void InitEverything(List<VehicleByRoutesRow> distributedTasks)
         {
@@ -396,6 +406,12 @@ namespace PCIPT.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             new AuthorizationWindow().Show();
+        }
+
+
+        private void InputDataButton_Click(object sender, RoutedEventArgs e)
+        {
+            new DispatcherImportWindow(DbContext).ShowDialog();
         }
     }
 }

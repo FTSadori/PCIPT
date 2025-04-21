@@ -21,13 +21,16 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="1"  CornerRadius="5 5 5 5" Background="White" Padding="5 5 5 5" ClipToBounds="True">
+            <Border Grid.Row="1" CornerRadius="5 5 5 5" Background="White" Padding="5 0 5 5" ClipToBounds="True">
                 <Grid>
                     <Canvas Name="GraphCanvas">
                     </Canvas>
 
                     <Canvas Name="VehiclesGraphCanvas">
                     </Canvas>
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Top" Height="20" Width="300" Background="{DynamicResource PrettyBlueGradient}" CornerRadius="0 0 10 10">
+                        <TextBlock Foreground="White" TextAlignment="Center" Padding="0 0 0 0" FontSize="14">▼</TextBlock>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>
@@ -95,7 +98,7 @@
             </Border>
             <Border Grid.Row="2" CornerRadius="0 0 5 5" Background="White" Padding="5">
                 <StackPanel Orientation="Vertical" Visibility="Visible" Margin="0 0 0 20">
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Import data</Button>
+                    <Button Name="ImportDataButton" Click="InputDataButton_Click" BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Import data</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource DisableGradient}" Width="160">Clear data</Button>
                 </StackPanel>
             </Border>

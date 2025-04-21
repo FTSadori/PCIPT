@@ -105,7 +105,7 @@ namespace PCIPT.Windows
                         "VehicleTypes.csv",
                         "Nodes.csv",
                         "VehicleCosts.csv",
-                        "TextPathes.csv",
+                        "Pathes.csv",
                         "DistributedTasks.csv",
                         "FinalConsts.csv",
                     };
@@ -217,7 +217,7 @@ namespace PCIPT.Windows
                 }
 
                 errorMessage = "Calculating vehicle stats by points";
-                var vehiclesByRoutes = VehiclesByRoutesCalculator.CalculateVehicleStatsByPoints(PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.cargoDtos, PlannerImportWindow.vehicleDtos, PlannerImportWindow.vehicleTypeDtos, vehicleCosts, PlannerImportWindow.timeFund, PlannerImportWindow.workingDays, PlannerImportWindow.maxDailyCargo);
+                var vehiclesByRoutes = VehiclesByRoutesCalculator.CalculateVehicleStatsByPoints(PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.cargoDtos, PlannerImportWindow.vehicleDtos, PlannerImportWindow.vehicleTypeDtos, vehicleCosts, PlannerImportWindow.timeFund, PlannerImportWindow.workingDays);
                 foreach (var vehicleByRoutes in vehiclesByRoutes)
                 {
                     CsvHandler.PutAllToFile(vehicleByRoutes.Key.FileName, vehicleByRoutes.Value);

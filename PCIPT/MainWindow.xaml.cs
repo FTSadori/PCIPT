@@ -112,7 +112,7 @@ namespace PCIPT
                 vehicleRemains[vehicle.Name] = vehicle.MaxQuantity;
             }
 
-            var vehiclesByRoutes = VehiclesByRoutesCalculator.CalculateVehicleStatsByPoints(points, routes, cargoes, vehicles, vehicleTypes, costTable, DAILY_TIME_FUND, WORKING_DAYS, MAX_DAILY_CARGO);
+            var vehiclesByRoutes = VehiclesByRoutesCalculator.CalculateVehicleStatsByPoints(points, routes, cargoes, vehicles, vehicleTypes, costTable, DAILY_TIME_FUND, WORKING_DAYS);
             foreach (var vehicleByRoutes in vehiclesByRoutes)
             {
                 CsvHandler.PutAllToFile(vehicleByRoutes.Key.FileName, vehicleByRoutes.Value);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Abstractions;
 using Microsoft.Win32;
+using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
 using PCIPT.Core.DataHandler;
 using PCIPT.Database.Commands;
 using PCIPT.Dtos.Cargoes;
@@ -52,6 +53,7 @@ namespace PCIPT.Windows
             cargoTurnoverPointDtos = null;
             vehicleTypeDtos = null;
             nodeDtos = null;
+            vehicleDtos = null;
         }
 
         private void ClearAllColors()
@@ -85,7 +87,6 @@ namespace PCIPT.Windows
 
         public static int workingDays = 0;
         public static float timeFund = 0f;
-        public static float maxDailyCargo = 0f;
         public static List<CostWeightDto>? costWeightDtos = null;
         public static List<FuelVehicleDto>? fuelVehicleDtos = null;
         public static List<ElectricVehicleDto>? electricVehicleDtos = null;

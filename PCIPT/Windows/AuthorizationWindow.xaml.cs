@@ -319,7 +319,7 @@ namespace PCIPT.Windows
 
         private void DispatcherButton_Click(object sender, RoutedEventArgs e)
         {
-            var w = new GraphWindow();
+            var w = new GraphWindow(DbContext);
             w.Show();
             Close();
         }
