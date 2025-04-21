@@ -174,7 +174,7 @@ namespace PCIPT.Windows
         {
             VehiclesGraphCanvas.Children.Clear();
 
-            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size, new(TotalShiftWidth, TotalShiftHeight)), size))
+            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size), size))
             {
                 VehiclesGraphCanvas.Children.Add(child);
             }

@@ -59,7 +59,7 @@ namespace PCIPT.Windows.DataHandlers
             return result;
         }
 
-        public static List<GraphVehiclesData> ConvertToScreenValues(List<GraphVehiclesData> vehiclesCoords, Canvas VehiclesCanvas, double size, NegSize shift)
+        public static List<GraphVehiclesData> ConvertToScreenValues(List<GraphVehiclesData> vehiclesCoords, Canvas VehiclesCanvas, double size)
         {
             double NormalDistance = Math.Min(VehiclesCanvas.ActualWidth, VehiclesCanvas.ActualHeight) / 2.0 * 0.8 * size;
 
@@ -69,8 +69,8 @@ namespace PCIPT.Windows.DataHandlers
             foreach (var vehicle in vehiclesCoords)
             {
                 result.Add(new(vehicle.Type, new(
-                    zeroPoint.Width + NormalDistance * vehicle.Coord.Width + shift.Width,
-                    zeroPoint.Height + NormalDistance * vehicle.Coord.Height + shift.Height)));
+                    zeroPoint.Width + NormalDistance * vehicle.Coord.Width,
+                    zeroPoint.Height + NormalDistance * vehicle.Coord.Height)));
             }
             return result;
         }
