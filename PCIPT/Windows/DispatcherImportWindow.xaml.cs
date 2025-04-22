@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
 using PCIPT.Core.DataHandler;
+using PCIPT.Database.Commands;
 using PCIPT.Dtos.Cargoes;
 using PCIPT.Dtos.CargoTurnoverPoints;
 using PCIPT.Dtos.CostWeight;
@@ -9,6 +10,7 @@ using PCIPT.Dtos.Node;
 using PCIPT.Dtos.Routes;
 using PCIPT.Dtos.Vehicles;
 using PCIPT.Dtos.VehicleTypes;
+using PCIPT.Windows.DataHandlers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -243,6 +245,77 @@ namespace PCIPT.Windows
             }
         }
 
+
+        private void ImportDatabaseButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                nodesCoordsDtos = null;
+                nodesCoordsDtos = PlannerDataFromDatabaseConverter.ToNodesCoords(new SelectAllNodesCoordsCommand(DbContext.SqlConnection).Execute());
+                Indicator1.Text = "Good";
+                Indicator1.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator1.Text = "Error"; Indicator1.Foreground = Brushes.Red; }
+            try
+            {
+                fuelVehicleDtos = null;
+                fuelVehicleDtos = PlannerDataFromDatabaseConverter.ToFuelVehicles(new SelectAllFuelVehiclesCommand(DbContext.SqlConnection).Execute());
+                Indicator2.Text = "Good";
+                Indicator2.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator2.Text = "Error"; Indicator2.Foreground = Brushes.Red; }
+            try
+            {
+                electricVehicleDtos = null;
+                electricVehicleDtos = PlannerDataFromDatabaseConverter.ToElectricVehicles(new SelectAllElectricVehiclesCommand(DbContext.SqlConnection).Execute());
+                Indicator3.Text = "Good";
+                Indicator3.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator3.Text = "Error"; Indicator3.Foreground = Brushes.Red; }
+            try
+            {
+                routeDtos = null;
+                routeDtos = PlannerDataFromDatabaseConverter.ToRoutes(new SelectAllRoutesCommand(DbContext.SqlConnection).Execute());
+                Indicator4.Text = "Good";
+                Indicator4.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator4.Text = "Error"; Indicator4.Foreground = Brushes.Red; }
+            try
+            {
+                cargoDtos = null;
+                cargoDtos = PlannerDataFromDatabaseConverter.ToCargoes(new SelectAllCargoesCommand(DbContext.SqlConnection).Execute());
+                Indicator5.Text = "Good";
+                Indicator5.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator5.Text = "Error"; Indicator5.Foreground = Brushes.Red; }
+            try
+            {
+                cargoTurnoverPointDtos = null;
+                cargoTurnoverPointDtos = PlannerDataFromDatabaseConverter.ToCargoTurnoverPoints(new SelectAllCargoTurnoverPointsCommand(DbContext.SqlConnection).Execute());
+                Indicator6.Text = "Good";
+                Indicator6.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator6.Text = "Error"; Indicator6.Foreground = Brushes.Red; }
+            try
+            {
+                vehicleTypeDtos = null;
+                vehicleTypeDtos = PlannerDataFromDatabaseConverter.ToVehicleTypes(new SelectAllVehicleTypesCommand(DbContext.SqlConnection).Execute());
+                Indicator7.Text = "Good";
+                Indicator7.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator7.Text = "Error"; Indicator7.Foreground = Brushes.Red; }
+            try
+            {
+                nodeDtos = null;
+                nodeDtos = PlannerDataFromDatabaseConverter.ToNodes(new SelectAllNodesCommand(DbContext.SqlConnection).Execute());
+                Indicator8.Text = "Good";
+                Indicator8.Foreground = Brushes.LightGreen;
+            }
+            catch (Exception) { Indicator8.Text = "Error"; Indicator8.Foreground = Brushes.Red; }
+
+            CheckIfApplyingIsAvaliable();
+        }
+
         private void ImportDistributed_Click(object sender, RoutedEventArgs e)
         {
             AskCSVImport("DistributedTasks", sender as Button);
@@ -250,7 +323,23 @@ namespace PCIPT.Windows
 
         private void StartPlanningButton_Click(object sender, RoutedEventArgs e)
         {
+            var Vehicles = new List<VehicleDto>();
+            foreach (var record in fuelVehicleDtos)
+                Vehicles.Add(record);
+            foreach (var record in electricVehicleDtos)
+                Vehicles.Add(record);
 
+            GraphWindow.This.NodesCoords = nodesCoordsDtos;
+            GraphWindow.This.Vehicles = Vehicles;
+            GraphWindow.This.Routes = routeDtos;
+            GraphWindow.This.Cargoes = cargoDtos;
+            GraphWindow.This.CargoPoints = cargoTurnoverPointDtos;
+            GraphWindow.This.VehicleTypes = vehicleTypeDtos;
+            GraphWindow.This.Nodes = nodeDtos;
+            GraphWindow.This.DistributedTasks = distributedTasks;
+
+            Close();
+            GraphWindow.This.InitAndRender();
         }
     }
 }

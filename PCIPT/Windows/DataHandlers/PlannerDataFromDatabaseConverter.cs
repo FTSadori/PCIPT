@@ -1,6 +1,7 @@
 ﻿using PCIPT.Dtos.Cargoes;
 using PCIPT.Dtos.CargoTurnoverPoints;
 using PCIPT.Dtos.CostWeight;
+using PCIPT.Dtos.Graph;
 using PCIPT.Dtos.Node;
 using PCIPT.Dtos.Routes;
 using PCIPT.Dtos.Vehicles;
@@ -23,6 +24,18 @@ namespace PCIPT.Windows.DataHandlers
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
                 list.Add(new CostWeightDto((string)row["name"], (float)row["cweight"]));
+            }
+
+            return list;
+        }
+
+        public static List<NodesCoordsDto> ToNodesCoords(DataSet dataSet)
+        {
+            List<NodesCoordsDto> list = new();
+
+            foreach (DataRow row in dataSet.Tables[0].Rows)
+            {
+                list.Add(new NodesCoordsDto((int)row["id"], (float)row["coordx"], (float)row["coordy"]));
             }
 
             return list;

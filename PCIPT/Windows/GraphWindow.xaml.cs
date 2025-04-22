@@ -44,6 +44,8 @@ namespace PCIPT.Windows
         {
             InitializeComponent();
 
+            This = this;
+
             Nodes = CsvHandler.GetAllFromFile<NodeDto>("Nodes.csv");
             Routes = CsvHandler.GetAllFromFile<RouteDto>("Routes.csv");
             DistributedTasks = CsvHandler.GetAllFromFile<VehicleByRoutesRow>("DistributedTasks.csv");
@@ -61,6 +63,8 @@ namespace PCIPT.Windows
                 Vehicles.Add(record);
         }
 
+        public static GraphWindow This;
+
         public static void DoCmd(ThreadStart th)
         {
             Application.Current.Dispatcher.BeginInvoke(DispatcherPriority.Normal, th);
@@ -73,14 +77,14 @@ namespace PCIPT.Windows
         private List<int> starts;
         private List<NegSize> biases;
 
-        private readonly List<NodeDto> Nodes;
-        private readonly List<RouteDto> Routes;
-        private readonly List<VehicleByRoutesRow> DistributedTasks;
-        private readonly List<NodesCoordsDto> NodesCoords;
-        private readonly List<CargoTurnoverPointDto> CargoPoints;
-        private readonly List<VehicleTypeDto> VehicleTypes;
-        private readonly List<CargoDto> Cargoes;
-        private readonly List<VehicleDto> Vehicles;
+        public List<NodeDto> Nodes;
+        public List<RouteDto> Routes;
+        public List<VehicleByRoutesRow> DistributedTasks;
+        public List<NodesCoordsDto> NodesCoords;
+        public List<CargoTurnoverPointDto> CargoPoints;
+        public List<VehicleTypeDto> VehicleTypes;
+        public List<CargoDto> Cargoes;
+        public List<VehicleDto> Vehicles;
 
         private double CurrentSize = 1;
         private bool Init = false;
@@ -91,9 +95,10 @@ namespace PCIPT.Windows
         {
             InitializeComponent();
 
-            DbContext = dbContext;
-            //This = this;
+            This = this;
 
+            DbContext = dbContext;
+            
             //AbleOptionButtons(false);
         }
 
@@ -389,9 +394,7 @@ namespace PCIPT.Windows
             switch (e.Key)
             {
                 case Key.I:
-                    InitEverything(DistributedTasks);
-                    RenderVehicles(CurrentSize);
-                    RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+                    InitAndRender();
                     break;
                 case Key.J:
                     simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
@@ -401,6 +404,13 @@ namespace PCIPT.Windows
                     simulationController.SaveStats();
                     break;
             }
+        }
+
+        public void InitAndRender()
+        {
+            InitEverything(DistributedTasks);
+            RenderVehicles(CurrentSize);
+            RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

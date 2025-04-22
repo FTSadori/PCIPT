@@ -108,7 +108,7 @@
                         </StackPanel>
 
                     </StackPanel>
-                    <Button Name="ImportDatabaseButton"  Style="{StaticResource RegButton}" Margin="5" Height="24" BorderThickness="1" Background="White" Foreground="{StaticResource RoundedTextBoxGrad}" Width="300" FontSize="16">Import from connected database</Button>
+                    <Button Name="ImportDatabaseButton" Click="ImportDatabaseButton_Click"  Style="{StaticResource RegButton}" Margin="5" Height="24" BorderThickness="1" Background="White" Foreground="{StaticResource RoundedTextBoxGrad}" Width="300" FontSize="16">Import from connected database</Button>
                 </StackPanel>
             </Border>
             <Border Visibility="Visible" Name="BorderCsv" Style="{StaticResource PrettyBorder}" Margin="0 -3 0 0" Background="{StaticResource RoundedTextBoxGrad}" BorderThickness="0" Width="560">
