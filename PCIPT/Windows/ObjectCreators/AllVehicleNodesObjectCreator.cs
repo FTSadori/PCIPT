@@ -14,6 +14,7 @@ namespace PCIPT.Windows.ObjectCreators
     {
         private static Dictionary<string, Color> pickedColors = new();
         private const int colorDistance = 30;
+        private const int maxLightness = 512;
 
         public static List<Ellipse> GetObjects(List<GraphVehiclesData> vehiclesDatas, double size)
         {
@@ -43,6 +44,13 @@ namespace PCIPT.Windows.ObjectCreators
             {
                 c = RandomColorPicker.GetRandomColor();
                 bad = false;
+
+                int lightness = c.R + c.G + c.B;
+                if (lightness >= maxLightness)
+                {
+                    bad = true;
+                    continue;
+                }
 
                 foreach (var pair in pickedColors)
                 {
