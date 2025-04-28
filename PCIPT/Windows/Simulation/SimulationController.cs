@@ -73,7 +73,7 @@ namespace PCIPT.Windows.Simulation
             StreamWriter sw = new(logFilePath, true);
             foreach (var vehicle in vehicleObjects)
             {
-                var effectiveDeltaSeconds = deltaSeconds * random.NextDouble() * (1.0 - effectiveTime) + effectiveTime;
+                var effectiveDeltaSeconds = deltaSeconds * (effectiveTime + random.NextDouble() * (1.0 - effectiveTime));
                 switch (vehicle.vehicleState)
                 {
                     case VehicleState.AWAITS:

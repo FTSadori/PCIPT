@@ -16,6 +16,11 @@ namespace PCIPT.Windows.ObjectCreators
         private const int colorDistance = 30;
         private const int maxLightness = 512;
 
+        public static void ClearAllColors()
+        {
+            pickedColors = new();
+        }
+
         public static List<Ellipse> GetObjects(List<GraphVehiclesData> vehiclesDatas, double size)
         {
             List<Ellipse> ellipses = new();

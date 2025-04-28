@@ -45,8 +45,6 @@ namespace PCIPT
         {
             InitializeComponent();
 
-            var w = new GraphWindow();
-            w.Show();
             //Test1();
             Test2();
         }

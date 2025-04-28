@@ -1,4 +1,5 @@
-﻿using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
+﻿using PCIPT.Calculations.FirstStage.RouteFinder;
+using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
 using PCIPT.Core.DataHandler;
 using PCIPT.Dtos.Cargoes;
 using PCIPT.Dtos.CargoTurnoverPoints;
@@ -40,29 +41,6 @@ namespace PCIPT.Windows
     /// </summary>
     public partial class GraphWindow : Window
     {
-        public GraphWindow()
-        {
-            InitializeComponent();
-
-            This = this;
-
-            Nodes = CsvHandler.GetAllFromFile<NodeDto>("Nodes.csv");
-            Routes = CsvHandler.GetAllFromFile<RouteDto>("Routes.csv");
-            DistributedTasks = CsvHandler.GetAllFromFile<VehicleByRoutesRow>("DistributedTasks.csv");
-            NodesCoords = CsvHandler.GetAllFromFile<NodesCoordsDto>("NodesCoords.csv");
-            CargoPoints = CsvHandler.GetAllFromFile<CargoTurnoverPointDto>("CargoTurnoverPoints.csv");
-            VehicleTypes = CsvHandler.GetAllFromFile<VehicleTypeDto>("VehicleTypes.csv");
-            Cargoes = CsvHandler.GetAllFromFile<CargoDto>("Cargoes.csv");
-
-            Vehicles = new List<VehicleDto>();
-            var records = CsvHandler.GetAllFromFile<FuelVehicleDto>("FuelVehicles.csv");
-            foreach (var record in records)
-                Vehicles.Add(record);
-            var records2 = CsvHandler.GetAllFromFile<ElectricVehicleDto>("ElectricVehicles.csv");
-            foreach (var record in records2)
-                Vehicles.Add(record);
-        }
-
         public static GraphWindow This;
 
         public static void DoCmd(ThreadStart th)
@@ -86,10 +64,49 @@ namespace PCIPT.Windows
         public List<CargoDto> Cargoes;
         public List<VehicleDto> Vehicles;
 
+        private double GUISize = 1;
         private double CurrentSize = 1;
         private bool Init = false;
         private double TotalShiftHeight = 0;
         private double TotalShiftWidth = 0;
+
+        private void ClearDataButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            MessageBoxResult result = System.Windows.MessageBox.Show(
+                "Do you want to clear data?",
+                "Confirmation",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question
+            );
+
+            if (result == MessageBoxResult.Yes)
+            {
+                AbleOptionButtons(false);
+
+                Vehicles = null;
+                Cargoes = null;
+                VehicleTypes = null;
+                CargoPoints = null;
+                NodesCoords = null;
+                DistributedTasks = null;
+                Routes = null;
+                Nodes = null;
+                starts = null;
+                biases = null;
+                nodesCoords = new();
+                vehiclesCoords = new();
+                realNodesSize = new();
+
+                Init = false;
+                TotalShiftHeight = 0;
+                TotalShiftWidth = 0;
+                CurrentSize = 1;
+
+                GraphCanvas.Children.Clear();
+                VehiclesGraphCanvas.Children.Clear();
+            }
+        }
 
         public GraphWindow(DbContext dbContext)
         {
@@ -99,7 +116,7 @@ namespace PCIPT.Windows
 
             DbContext = dbContext;
             
-            //AbleOptionButtons(false);
+            AbleOptionButtons(false);
         }
 
         DbContext DbContext { get; set; }
@@ -108,6 +125,77 @@ namespace PCIPT.Windows
         {
             InitGraph();
             InitVehicles(distributedTasks);
+        }
+
+        public void AbleControlButton(bool isSimulationRunning)
+        {
+            if (isSimulationRunning)
+            {
+                ReroutingButton.IsEnabled = true;
+                ReroutingButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+
+                StopButton.IsEnabled = true;
+                StopButton.SetResourceReference(BackgroundProperty, "ErrorGradient");
+
+                PauseButton.IsEnabled = true;
+                PauseButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+
+                StartButton.IsEnabled = false;
+                StartButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                ClearDataButton.IsEnabled = false;
+                ClearDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+            }
+            else
+            {
+                ReroutingButton.IsEnabled = false;
+                ReroutingButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                StopButton.IsEnabled = false;
+                StopButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                PauseButton.IsEnabled = false;
+                PauseButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                StartButton.IsEnabled = true;
+                StartButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+
+                ClearDataButton.IsEnabled = true;
+                ClearDataButton.SetResourceReference(BackgroundProperty, "ErrorGradient");
+            }
+        }
+
+        public void AbleOptionButtons(bool isDataPresent)
+        {
+            if (isDataPresent)
+            {
+                ImportDataButton.IsEnabled = false;
+                ImportDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                ClearDataButton.IsEnabled = true;
+                ClearDataButton.SetResourceReference(BackgroundProperty, "ErrorGradient");
+
+                MenuButtonsStack.Visibility = Visibility.Visible;
+                ControlStack.Visibility = Visibility.Visible;
+                SettingsStack.Visibility = Visibility.Visible;
+                TopPanelClosed.Visibility = Visibility.Visible;
+
+                AbleControlButton(false);
+            }
+            else
+            {
+                ImportDataButton.IsEnabled = true;
+                ImportDataButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+
+                ClearDataButton.IsEnabled = false;
+                ClearDataButton.SetResourceReference(BackgroundProperty, "DisableGradient");
+
+                MenuButtonsStack.Visibility = Visibility.Hidden;
+                ControlStack.Visibility = Visibility.Hidden;
+                SettingsStack.Visibility = Visibility.Hidden;
+                TopPanelClosed.Visibility = Visibility.Hidden;
+                TopPanelOpened.Visibility = Visibility.Hidden;
+            }
         }
 
         private void InitGraph()
@@ -135,6 +223,11 @@ namespace PCIPT.Windows
                 }
             }
 
+            ShiftOnlyVehicles(Offset);
+        }
+
+        private void ShiftOnlyVehicles(NegSize Offset)
+        {
             foreach (var child in VehiclesGraphCanvas.Children)
             {
                 if (child is Ellipse ellipse)
@@ -172,8 +265,8 @@ namespace PCIPT.Windows
             {
                 if (child is Grid grid)
                 {
-                    Canvas.SetLeft(grid, Canvas.GetLeft(grid) - realNodesSize[i].Width * Size);
-                    Canvas.SetBottom(grid, Canvas.GetBottom(grid) - realNodesSize[i].Height * Size);
+                    Canvas.SetLeft(grid, Canvas.GetLeft(grid) - realNodesSize[i].Width * Size * GUISize);
+                    Canvas.SetBottom(grid, Canvas.GetBottom(grid) - realNodesSize[i].Height * Size * GUISize);
                     grid.Visibility = Visibility.Visible;
                     ++i;
                 }
@@ -189,7 +282,7 @@ namespace PCIPT.Windows
         {
             VehiclesGraphCanvas.Children.Clear();
 
-            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size), size))
+            foreach (var child in AllVehicleNodesObjectCreator.GetObjects(GraphVehicleDataConverter.ConvertToScreenValues(vehiclesCoords, VehiclesGraphCanvas, size), size * GUISize))
             {
                 VehiclesGraphCanvas.Children.Add(child);
             }
@@ -213,7 +306,7 @@ namespace PCIPT.Windows
                     zeroPoint.Width + NormalDistance * nodesCoords[route.DestinationId].Width,
                     GraphCanvas.ActualHeight - zeroPoint.Height - NormalDistance * nodesCoords[route.DestinationId].Height);
 
-                GraphCanvas.Children.Add(CreateLine(realPoint1, realPoint2, size));
+                GraphCanvas.Children.Add(CreateLine(realPoint1, realPoint2, size * GUISize));
             }
 
             foreach (var node in nodes) 
@@ -222,7 +315,7 @@ namespace PCIPT.Windows
                     zeroPoint.Width + NormalDistance * nodesCoords[node.Id].Width,
                     zeroPoint.Height + NormalDistance * nodesCoords[node.Id].Height);
 
-                var nodeObj = CreateNodeGrid(node.Name, node.Id, realPoint, size);
+                var nodeObj = CreateNodeGrid(node.Name, node.Id, realPoint, size * GUISize);
                 nodeObj.Visibility = Visibility.Hidden;
                 GraphCanvas.Children.Add(nodeObj);
             }
@@ -307,8 +400,14 @@ namespace PCIPT.Windows
         {
             if (Init)
             {
+                double width = GraphCanvas.ActualWidth;
+                double height = GraphCanvas.ActualHeight;
+
+                double sizeShiftX = width * CurrentSize / 2 - width / 2;
+                double sizeShiftY = height * CurrentSize / 2 - height / 2;
+
                 RenderVehicles(CurrentSize);
-                RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+                RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth - sizeShiftX, TotalShiftHeight - sizeShiftY));
 
                 if (simulationThread != null)
                 {
@@ -370,15 +469,23 @@ namespace PCIPT.Windows
             {
                 while (true)
                 {
-                    for (int i = 0; i < 30; ++i)
+                    for (int i = 0; i < 1; ++i)
                     {
                         DoCmd(delegate () {
-                            simulationController.NextStep(1, 0.85);
+                            simulationController.NextStep(0.01, 0.85);
                         });
                     }
                     DoCmd(delegate () { 
                         vehiclesCoords = simulationController.GetNewGraphVehiclesData();
                         RenderVehicles(CurrentSize);
+
+                        double width = GraphCanvas.ActualWidth;
+                        double height = GraphCanvas.ActualHeight;
+
+                        double sizeShiftX = width * CurrentSize / 2 - width / 2;
+                        double sizeShiftY = height * CurrentSize / 2 - height / 2;
+
+                        ShiftOnlyVehicles(new NegSize(TotalShiftWidth - sizeShiftX, TotalShiftHeight - sizeShiftY));
                     });
                     Thread.Sleep(10);
                 }
@@ -393,15 +500,26 @@ namespace PCIPT.Windows
         {
             switch (e.Key)
             {
-                case Key.I:
-                    InitAndRender();
-                    break;
-                case Key.J:
-                    simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
-                    StartSimulation();
-                    break;
                 case Key.K:
                     simulationController.SaveStats();
+                    break;
+                case Key.Down:
+                    Down_Click(sender, new());
+                    break;
+                case Key.Up:
+                    Up_Click(sender, new());
+                    break;
+                case Key.Left:
+                    Left_Click(sender, new());
+                    break;
+                case Key.Right:
+                    Right_Click(sender, new());
+                    break;
+                case Key.Z:
+                    SizeMinus_Click(sender, new());
+                    break;
+                case Key.X:
+                    SizePlus_Click(sender, new());
                     break;
             }
         }
@@ -411,6 +529,8 @@ namespace PCIPT.Windows
             InitEverything(DistributedTasks);
             RenderVehicles(CurrentSize);
             RenderGraph(Nodes, Routes, CurrentSize, new NegSize(TotalShiftWidth, TotalShiftHeight));
+
+            AbleOptionButtons(true);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -422,6 +542,76 @@ namespace PCIPT.Windows
         private void InputDataButton_Click(object sender, RoutedEventArgs e)
         {
             new DispatcherImportWindow(DbContext).ShowDialog();
+        }
+
+        private void TopPanelClosedButton_Click(object sender, RoutedEventArgs e)
+        {
+            TopPanelClosed.Visibility = Visibility.Collapsed;
+            TopPanelOpened.Visibility = Visibility.Visible;
+        }
+
+        private void TopPanelOpenedButton_Click(object sender, RoutedEventArgs e)
+        {
+            TopPanelClosed.Visibility = Visibility.Visible;
+            TopPanelOpened.Visibility = Visibility.Collapsed;
+        }
+
+        private void StartButton_Click(object sender, RoutedEventArgs e)
+        {
+            // specify log file location
+
+            RouteCalculator.InitRoutes(Routes, Nodes);
+            simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
+            StartSimulation();
+
+            AbleControlButton(true);
+        }
+
+        private void PauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (PausedText.Visibility == Visibility.Visible)
+            {
+                PauseButton.Content = "Pause";
+                PauseButton.Width = 50;
+                PauseButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+                PausedText.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                PauseButton.Content = "Unpause";
+                PauseButton.Width = 60;
+                PauseButton.SetResourceReference(BackgroundProperty, "SuccessGradient");
+                PausedText.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void StopButton_Click(object sender, RoutedEventArgs e)
+        {
+            PauseButton.Content = "Pause";
+            PauseButton.Width = 50;
+            PauseButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+
+            AbleControlButton(false);
+        }
+
+        private void GUILess_Click(object sender, RoutedEventArgs e)
+        {
+            GUISize = Math.Max(0.2, GUISize - 0.1);
+            GUIPercentLabel.Text = $"{(int)(GUISize * 100)}%";
+            Rerender();
+        }
+
+        private void GUIMore_Click(object sender, RoutedEventArgs e)
+        {
+            GUISize = Math.Min(3, GUISize + 0.1);
+            GUIPercentLabel.Text = $"{(int)(GUISize * 100)}%";
+            Rerender();
+        }
+
+        private void UpdateColorsButton_Click(object sender, RoutedEventArgs e)
+        {
+            AllVehicleNodesObjectCreator.ClearAllColors();
+            Rerender();
         }
     }
 }
