@@ -31,6 +31,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace PCIPT.Windows
 {
@@ -63,6 +64,7 @@ namespace PCIPT.Windows
         public List<VehicleTypeDto> VehicleTypes;
         public List<CargoDto> Cargoes;
         public List<VehicleDto> Vehicles;
+        public double dailyTimeFund;
 
         private double GUISize = 1;
         private double CurrentSize = 1;
@@ -463,31 +465,62 @@ namespace PCIPT.Windows
 
         Thread? simulationThread = null;
 
+        int simulationSpeed = 1;
+
+        double timeSpent = 0;
+
+        int frameRate = 5;
+
         private void StartSimulation()
         {
             simulationThread = new(delegate ()
             {
+                Stopwatch stopwatch = new();
                 while (true)
                 {
-                    for (int i = 0; i < 1; ++i)
-                    {
-                        DoCmd(delegate () {
-                            simulationController.NextStep(0.01, 0.85);
-                        });
-                    }
-                    DoCmd(delegate () { 
+                    double additionTime = 0;
+
+                    double width = GraphCanvas.ActualWidth;
+                    double height = GraphCanvas.ActualHeight;
+
+                    double sizeShiftX = width * CurrentSize / 2 - width / 2;
+                    double sizeShiftY = height * CurrentSize / 2 - height / 2;
+
+                    bool ended = false;
+
+                    double timeElapsed = timeSpent + 1.0 / frameRate * simulationSpeed + additionTime;
+
+                    DoCmd(delegate () {
+                        stopwatch.Restart();
+
+                        SetTimeSpent(timeSpent + 1.0 / frameRate * simulationSpeed + additionTime);
+                        
+                        simulationController.NextStep(1.0 / frameRate * simulationSpeed + additionTime, 0.85);
+                        additionTime = 0;
+
                         vehiclesCoords = simulationController.GetNewGraphVehiclesData();
                         RenderVehicles(CurrentSize);
 
-                        double width = GraphCanvas.ActualWidth;
-                        double height = GraphCanvas.ActualHeight;
-
-                        double sizeShiftX = width * CurrentSize / 2 - width / 2;
-                        double sizeShiftY = height * CurrentSize / 2 - height / 2;
-
                         ShiftOnlyVehicles(new NegSize(TotalShiftWidth - sizeShiftX, TotalShiftHeight - sizeShiftY));
+                        stopwatch.Stop();
+                        ended = true;
                     });
-                    Thread.Sleep(10);
+                    int sleeped = 0;
+                    while (!ended) { Thread.Sleep(1); sleeped += 1; }
+
+                    int total = (int)(1.0 / frameRate * 1000 - stopwatch.Elapsed.TotalMilliseconds - sleeped);
+                    DoCmd(delegate ()
+                    {
+                        PausedText.Visibility = Visibility.Visible;
+                        PausedText.Text = total + " | " + timeElapsed;
+                    });
+
+                    if (total <= 0)
+                    {
+                        additionTime = -total;
+                    }
+                    else
+                        Thread.Sleep(total);
                 }
             });
             simulationThread.IsBackground = true;
@@ -563,8 +596,15 @@ namespace PCIPT.Windows
             RouteCalculator.InitRoutes(Routes, Nodes);
             simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
             StartSimulation();
+            SetTimeSpent(0);
 
             AbleControlButton(true);
+        }
+
+        private void SetTimeSpent(double time)
+        {
+            timeSpent = time;
+            TimePassedLabel.Text = $"{(int)(time / 3600)}h {(int)(time / 60 % 60)}m {(int)(time % 60)}s ({time / dailyTimeFund / 60 * 100:0.00}%)";
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -612,6 +652,18 @@ namespace PCIPT.Windows
         {
             AllVehicleNodesObjectCreator.ClearAllColors();
             Rerender();
+        }
+
+        private void SpeedButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (int.TryParse(SpeedTextBox.Text, out simulationSpeed))
+            {
+                SpeedTextBox.SetResourceReference(TextBox.BorderBrushProperty, "RoundedTextBoxGrad");
+            }
+            else
+            {
+                SpeedTextBox.SetResourceReference(TextBox.BorderBrushProperty, "ErrorGradient");
+            }
         }
     }
 }

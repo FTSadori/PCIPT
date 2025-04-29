@@ -44,7 +44,6 @@ namespace PCIPT.Windows
 
         private void ClearData()
         {
-            timeFund = 0f;
             nodesCoordsDtos = null;
             fuelVehicleDtos = null;
             electricVehicleDtos = null;
@@ -57,7 +56,6 @@ namespace PCIPT.Windows
             distributedTasks = null;
         }
 
-        public static float timeFund = 0f;
         public static List<NodesCoordsDto>? nodesCoordsDtos = null;
         public static List<FuelVehicleDto>? fuelVehicleDtos = null;
         public static List<ElectricVehicleDto>? electricVehicleDtos = null;
@@ -329,6 +327,7 @@ namespace PCIPT.Windows
             foreach (var record in electricVehicleDtos)
                 Vehicles.Add(record);
 
+            GraphWindow.This.dailyTimeFund = int.Parse(DailyTimeFundTextBox.Text);
             GraphWindow.This.NodesCoords = nodesCoordsDtos;
             GraphWindow.This.Vehicles = Vehicles;
             GraphWindow.This.Routes = routeDtos;

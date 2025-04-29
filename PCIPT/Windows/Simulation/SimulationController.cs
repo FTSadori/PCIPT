@@ -73,32 +73,41 @@ namespace PCIPT.Windows.Simulation
             StreamWriter sw = new(logFilePath, true);
             foreach (var vehicle in vehicleObjects)
             {
-                var effectiveDeltaSeconds = deltaSeconds * (effectiveTime + random.NextDouble() * (1.0 - effectiveTime));
-                switch (vehicle.vehicleState)
-                {
-                    case VehicleState.AWAITS:
-                        Awaits(vehicle, sw);
-                        break;
-                    case VehicleState.MOVES_WITH_LOAD:
-                        MovesWithLoad(vehicle, sw, effectiveDeltaSeconds);
-                        break;
-                    case VehicleState.MOVES_WITHOUT_LOAD:
-                        MovesWithoutLoad(vehicle, sw, effectiveDeltaSeconds);
-                        break;
-                    case VehicleState.MOVES_BACK:
-                        MovesBack(vehicle, sw, effectiveDeltaSeconds);
-                        break;
-                    case VehicleState.LOADS:
-                        performance.accumulatedLoadTime += deltaSeconds;
-                        Loads(vehicle, sw, effectiveDeltaSeconds);
-                        break;
-                    case VehicleState.UNLOADS:
-                        performance.accumulatedUnloadTime += deltaSeconds;
-                        Unloads(vehicle, sw, effectiveDeltaSeconds);
-                        break;
-                }
+                StepForVehicle(sw, vehicle, deltaSeconds * (effectiveTime + random.NextDouble() * (1.0 - effectiveTime)), deltaSeconds);
             }
             sw.Close();
+        }
+
+        public void StepForVehicle(StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
+        {
+            if (time <= 0) return;
+
+            switch (vehicle.vehicleState)
+            {
+                case VehicleState.AWAITS:
+                    Awaits(vehicle, sw);
+                    break;
+                case VehicleState.MOVES_WITH_LOAD:
+                    time = MovesWithLoad(vehicle, sw, time);
+                    break;
+                case VehicleState.MOVES_WITHOUT_LOAD:
+                    time = MovesWithoutLoad(vehicle, sw, time);
+                    break;
+                case VehicleState.MOVES_BACK:
+                    time = MovesBack(vehicle, sw, time);
+                    break;
+                case VehicleState.LOADS:
+                    performance.accumulatedLoadTime += deltaSeconds;
+                    time = Loads(vehicle, sw, time);
+                    break;
+                case VehicleState.UNLOADS:
+                    performance.accumulatedUnloadTime += deltaSeconds;
+                    time = Unloads(vehicle, sw, time);
+                    break;
+                case VehicleState.OVER:
+                    return;
+            }
+            StepForVehicle(sw, vehicle, time, deltaSeconds);
         }
 
         public void ChangeState(VehicleObject vehicle, StreamWriter sw, VehicleState state)
@@ -107,7 +116,7 @@ namespace PCIPT.Windows.Simulation
             vehicle.vehicleState = state;
         }
 
-        public void MovesBack(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double MovesBack(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             int sourceId = vehicle.path[vehicle.pathIterator];
             int destinationId = vehicle.path[vehicle.pathIterator + 1];
@@ -118,6 +127,8 @@ namespace PCIPT.Windows.Simulation
 
             if (vehicle.lPassed >= 1)
             {
+                double secondsSaved = (vehicle.lPassed - 1) / delta * deltaSeconds;
+
                 vehicle.lPassed = 0;
                 vehicle.lastNodeId = destinationId;
                 vehicle.pathIterator++;
@@ -126,13 +137,15 @@ namespace PCIPT.Windows.Simulation
                 {
                     vehicle.loadTimeRemaining = vehicle.loadTime;
                     ChangeState(vehicle, sw, VehicleState.OVER);
-                    return;
+                    return secondsSaved;
                 }
                 sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+                return secondsSaved;
             }
+            return 0;
         }
 
-        public void MovesWithoutLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double MovesWithoutLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             int sourceId = vehicle.path[vehicle.pathIterator];
             int destinationId = vehicle.path[vehicle.pathIterator + 1];
@@ -144,6 +157,8 @@ namespace PCIPT.Windows.Simulation
 
             if (vehicle.lPassed >= 1)
             {
+                double secondsSaved = (vehicle.lPassed - 1) / delta * deltaSeconds;
+
                 vehicle.lPassed = 0;
                 vehicle.lastNodeId = destinationId;
                 vehicle.pathIterator++;
@@ -152,13 +167,15 @@ namespace PCIPT.Windows.Simulation
                 {
                     vehicle.loadTimeRemaining = vehicle.loadTime;
                     ChangeState(vehicle, sw, VehicleState.LOADS);
-                    return;
+                    return secondsSaved;
                 }
                 sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+                return secondsSaved;
             }
+            return 0;
         }
 
-        public void Unloads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double Unloads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             if (vehicle.loadTimeRemaining < 0)
             {
@@ -177,22 +194,31 @@ namespace PCIPT.Windows.Simulation
                         sw.WriteLine($"=========================== ERROR ===========================");
                         sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
                         sw.WriteLine($"=============================================================");
-                        return;
+                        return 0;
                     }
 
                     vehicle.path = path.Nodes;
                     vehicle.pathIterator = 0;
                     vehicle.lPassed = 0;
                     ChangeState(vehicle, sw, VehicleState.MOVES_WITHOUT_LOAD);
-                    return;
+                    return deltaSeconds;
                 }
 
                 ChangeState(vehicle, sw, VehicleState.AWAITS);
+                return deltaSeconds;
             }
-            else vehicle.loadTimeRemaining -= deltaSeconds;
+            else
+            {
+                vehicle.loadTimeRemaining -= deltaSeconds;
+                if (vehicle.loadTimeRemaining < 0)
+                {
+                    return -vehicle.loadTimeRemaining;
+                }
+                return 0;
+            }
         }
 
-        public void Loads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double Loads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             if (vehicle.loadTimeRemaining < 0)
             {
@@ -206,21 +232,27 @@ namespace PCIPT.Windows.Simulation
                     sw.WriteLine($"=========================== ERROR ===========================");
                     sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.toId}");
                     sw.WriteLine($"=============================================================");
-                    return;
+                    return 0;
                 }
 
                 vehicle.path = path.Nodes;
                 vehicle.pathIterator = 0;
                 vehicle.lPassed = 0;
                 ChangeState(vehicle, sw, VehicleState.MOVES_WITH_LOAD);
+                return deltaSeconds;
             }
             else
             {
                 vehicle.loadTimeRemaining -= deltaSeconds;
+                if (vehicle.loadTimeRemaining < 0)
+                {
+                    return -vehicle.loadTimeRemaining;
+                }
+                return 0;
             }
         }
 
-        public void MovesWithLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double MovesWithLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             int sourceId = vehicle.path[vehicle.pathIterator];
             int destinationId = vehicle.path[vehicle.pathIterator + 1];
@@ -232,6 +264,8 @@ namespace PCIPT.Windows.Simulation
 
             if (vehicle.lPassed >= 1)
             {
+                double secondsSaved = (vehicle.lPassed - 1) / delta * deltaSeconds;
+
                 vehicle.lPassed = 0;
                 vehicle.lastNodeId = destinationId;
                 vehicle.pathIterator++;
@@ -242,10 +276,13 @@ namespace PCIPT.Windows.Simulation
                     vehicle.load = vehicle.maxLoad * po.utilizationRate;
                     vehicle.loadTimeRemaining = vehicle.loadTime;
                     ChangeState(vehicle, sw, VehicleState.UNLOADS);
-                    return;
+                    return secondsSaved;
                 }
+
                 sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+                return secondsSaved;
             }
+            return 0;
         }
 
         public void Awaits(VehicleObject vehicle, StreamWriter sw)
