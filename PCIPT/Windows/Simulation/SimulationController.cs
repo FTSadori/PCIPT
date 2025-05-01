@@ -47,7 +47,7 @@ namespace PCIPT.Windows.Simulation
 
                 var cargo = cargoDtos.Where(c => c.Code == dto.CargoCode).First();
 
-                pointObjects.Add(new PointObject(dto.Id, dto.OutgoingCargo, sour.Width, sour.Height, dest.Width, dest.Height, cargo.Type, cargo.CapacityUtilisationRate, RouteCalculator.GetDistanceBetween(dto.SourceId, dto.DestinationId), dto.SourceId, dto.DestinationId));
+                pointObjects.Add(new PointObject(dto.Id, dto.OutgoingCargo, dto.OutgoingCargo, dto.OutgoingCargo, sour.Width, sour.Height, dest.Width, dest.Height, cargo.Type, cargo.CapacityUtilisationRate, RouteCalculator.GetDistanceBetween(dto.SourceId, dto.DestinationId), dto.SourceId, dto.DestinationId));
             }
 
             int i = 0;
@@ -79,6 +79,7 @@ namespace PCIPT.Windows.Simulation
             sw.Close();
 
             ToObservableListTranslator.UpdateList(vehicleObjects);
+            ToObservablePointsListTranslator.UpdateList(pointObjects);
         }
 
         public void StepForVehicle(StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
@@ -238,6 +239,7 @@ namespace PCIPT.Windows.Simulation
                     sw.WriteLine($"=============================================================");
                     return 0;
                 }
+                po.actualCargoLeft = Math.Max(0, po.actualCargoLeft - vehicle.maxLoad * po.utilizationRate);
 
                 vehicle.path = path.Nodes;
                 vehicle.pathIterator = 0;

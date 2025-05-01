@@ -31,41 +31,14 @@
                         <Canvas Name="VehiclesGraphCanvas">
                         </Canvas>
 
-                        <Border Name="TopPanelClosed" Visibility="Visible" HorizontalAlignment="Center" VerticalAlignment="Top" Height="20" Width="200" Background="{DynamicResource PrettyBlueGradient}" CornerRadius="0 0 10 10">
-                            <Button Name="TopPanelClosedButton" Click="TopPanelClosedButton_Click" Style="{StaticResource RegButton}" Margin="8 0 8 0" BorderThickness="0" Background="Transparent" Foreground="White" Padding="0 0 0 0" FontSize="14">▼</Button>
-                        </Border>
-
-                        <Grid x:Name="TopPanelOpened" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" Height="145" Width="200">
-                            <Border BorderBrush="{DynamicResource PrettyBlueGradient}" BorderThickness="2" CornerRadius="0 0 10 10" Background="White">
-                                <StackPanel>
-                                    <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="10 0 0 0" FontSize="14">Controls</TextBlock>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="6 2 0 0">
-                                        <Button Margin="0 0 5 0" BorderThickness="0" FontSize="12" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="50" Name="StartButton" Click="StartButton_Click">Start</Button>
-                                        <Button Margin="0 0 5 0" BorderThickness="0" FontSize="12" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="50" Name="PauseButton" Click="PauseButton_Click">Pause</Button>
-                                        <Button Margin="0 0 5 0" BorderThickness="0" FontSize="12" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Width="50" Name="StopButton" Click="StopButton_Click">Stop</Button>
-                                    </StackPanel>
-                                    <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="10 10 0 0" FontSize="14">Time</TextBlock>
-                                    <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
-                                        <TextBlock Style="{DynamicResource SmallPrettyText}" Margin="6 2 0 0" FontSize="12">Passed:</TextBlock>
-                                        <TextBlock Name="TimePassedLabel" Style="{DynamicResource SmallPrettyText}" Margin="6 2 0 0" FontSize="12">0h 0m 0s (0%)</TextBlock>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
-                                        <Border Margin="6 0 5 0" BorderBrush="{DynamicResource PrettyBlueGradient}" BorderThickness="1" CornerRadius="6" Height="24">
-                                            <StackPanel Orientation="Horizontal">
-                                                <TextBox Name="SpeedTextBox" Margin="0" Width="50" TextAlignment="Right">1</TextBox>
-                                                <Button Name="SpeedButton" Click="SpeedButton_Click" Margin="0" BorderThickness="0" FontSize="12" Height="22" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="80">Set speed</Button>
-                                            </StackPanel>
-                                        </Border>
-                                    </StackPanel>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="{DynamicResource PrettyBlueGradient}" CornerRadius="0 0 10 10" Height="20" VerticalAlignment="Bottom">
-                                <Button Name="TopPanelOpenedButton" Click="TopPanelOpenedButton_Click" Style="{StaticResource RegButton}" Margin="8 0 8 0" BorderThickness="0" Background="Transparent" Foreground="White" Padding="0 0 0 0" FontSize="14">▲</Button>
-                            </Border>
-                        </Grid>
-
-                        <TextBlock Visibility="Collapsed" Name="PausedText" Style="{DynamicResource SmallPrettyText}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="2" FontSize="12">Paused...</TextBlock>
                     </Grid>
+
+                    <Border Name="TopPanelClosed" Visibility="Visible" HorizontalAlignment="Center" VerticalAlignment="Top" Height="20" Width="200" Background="{DynamicResource PrettyBlueGradient}" CornerRadius="0 0 10 10">
+                        <Button Name="TopPanelClosedButton" Click="TopPanelClosedButton_Click" Style="{StaticResource RegButton}" Margin="8 0 8 0" BorderThickness="0" Background="Transparent" Foreground="White" Padding="0 0 0 0" FontSize="14">▼</Button>
+                    </Border>
+
+
+                    <TextBlock Visibility="Collapsed" Name="PausedText" Style="{DynamicResource SmallPrettyText}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="2" FontSize="12">Paused...</TextBlock>
 
                     <Grid Visibility="Hidden" Name="VehiclesTableGrid">
                         <DataGrid Name="VehiclesDataGrid" Margin="0 25 0 0"
@@ -86,6 +59,56 @@
                               >
                         </DataGrid>
                     </Grid>
+
+                    <Grid Visibility="Hidden" Name="PointsTableGrid">
+                        <DataGrid Name="PointsDataGrid" Margin="0 25 0 0"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="#FF030323"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+                    </Grid>
+
+                    <Grid x:Name="TopPanelOpened" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" Height="145" Width="200">
+                        <Border BorderBrush="{DynamicResource PrettyBlueGradient}" BorderThickness="2" CornerRadius="0 0 10 10" Background="White">
+                            <StackPanel>
+                                <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="10 0 0 0" FontSize="14">Controls</TextBlock>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="6 2 0 0">
+                                    <Button Margin="0 0 5 0" BorderThickness="0" FontSize="12" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="50" Name="StartButton" Click="StartButton_Click">Start</Button>
+                                    <Button Margin="0 0 5 0" BorderThickness="0" FontSize="12" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="50" Name="PauseButton" Click="PauseButton_Click">Pause</Button>
+                                    <Button Margin="0 0 5 0" BorderThickness="0" FontSize="12" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource ErrorGradient}" Width="50" Name="StopButton" Click="StopButton_Click">Stop</Button>
+                                </StackPanel>
+                                <TextBlock Style="{DynamicResource SmallPrettyText}" TextAlignment="Left" Margin="10 10 0 0" FontSize="14">Time</TextBlock>
+                                <StackPanel Orientation="Horizontal" Margin="0 0 0 0">
+                                    <TextBlock Style="{DynamicResource SmallPrettyText}" Margin="6 2 0 0" FontSize="12">Passed:</TextBlock>
+                                    <TextBlock Name="TimePassedLabel" Style="{DynamicResource SmallPrettyText}" Margin="6 2 0 0" FontSize="12">0h 0m 0s (0%)</TextBlock>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0 3 0 0">
+                                    <Border Margin="6 0 5 0" BorderBrush="{DynamicResource PrettyBlueGradient}" BorderThickness="1" CornerRadius="6" Height="24">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Name="SpeedTextBox" Margin="0" Width="50" TextAlignment="Right">1</TextBox>
+                                            <Button Name="SpeedButton" Click="SpeedButton_Click" Margin="0" BorderThickness="0" FontSize="12" Height="22" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="80">Set speed</Button>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource PrettyBlueGradient}" CornerRadius="0 0 10 10" Height="20" VerticalAlignment="Bottom">
+                            <Button Name="TopPanelOpenedButton" Click="TopPanelOpenedButton_Click" Style="{StaticResource RegButton}" Margin="8 0 8 0" BorderThickness="0" Background="Transparent" Foreground="White" Padding="0 0 0 0" FontSize="14">▲</Button>
+                        </Border>
+                    </Grid>
+
 
                     <Border HorizontalAlignment="Left" VerticalAlignment="Top" Width="100" Height="20" Margin="-5 0 0 0" Background="{DynamicResource PrettyBlueGradient}" CornerRadius="5 0 10 0">
                         <TextBlock Name="ViewLabel" Style="{StaticResource PrettyText}" FontSize="12" Foreground="White" TextWrapping="Wrap">Graph view</TextBlock>
@@ -110,7 +133,7 @@
                 <StackPanel Orientation="Vertical" Visibility="Visible" Name="MenuButtonsStack">
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="GraphMenuButton" Click="GraphMenuButton_Click">Graph view</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="VehiclesMenuButton" Click="VehiclesMenuButton_Click">Vehicles table</Button>
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Points table</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="PointsMenuButton" Click="PointsMenuButton_Click">Points table</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Distributes tasks</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Output</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess</Button>

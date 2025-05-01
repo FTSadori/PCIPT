@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PCIPT.Dtos.Cargoes;
+using PCIPT.Dtos.CargoTurnoverPoints;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;

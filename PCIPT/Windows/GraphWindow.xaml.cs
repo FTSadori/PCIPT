@@ -119,8 +119,6 @@ namespace PCIPT.Windows
 
             DbContext = dbContext;
 
-            VehiclesDataGrid.ItemsSource = ToObservableListTranslator.ObservableVehicles;
-
             AbleOptionButtons(false);
         }
 
@@ -596,6 +594,14 @@ namespace PCIPT.Windows
         {
             // specify log file location
 
+            ToObservableListTranslator.ObservableVehicles = new();
+            ToObservablePointsListTranslator.ObservablePoints = new();
+            VehiclesDataGrid.ItemsSource = ToObservableListTranslator.ObservableVehicles;
+            PointsDataGrid.ItemsSource = ToObservablePointsListTranslator.ObservablePoints;
+            ToObservablePointsListTranslator.nodeDtos = Nodes;
+            ToObservablePointsListTranslator.cargoDtos = Cargoes;
+            ToObservablePointsListTranslator.cargoTurnoverPointDtos = CargoPoints;
+
             RouteCalculator.InitRoutes(Routes, Nodes);
             simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT");
             StartSimulation();
@@ -674,6 +680,7 @@ namespace PCIPT.Windows
             GraphViewGrid.Visibility = Visibility.Hidden;
             GridControlButtons.Visibility = Visibility.Hidden;
             VehiclesTableGrid.Visibility = Visibility.Hidden;
+            PointsTableGrid.Visibility = Visibility.Hidden;
         }
 
         private void GraphMenuButton_Click(object sender, RoutedEventArgs e)
@@ -689,6 +696,13 @@ namespace PCIPT.Windows
             CloseAllMenus();
             ViewLabel.Text = "Vehicles table";
             VehiclesTableGrid.Visibility = Visibility.Visible;
+        }
+
+        private void PointsMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseAllMenus();
+            ViewLabel.Text = "Points table";
+            PointsTableGrid.Visibility = Visibility.Visible;
         }
     }
 }

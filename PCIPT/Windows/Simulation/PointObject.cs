@@ -10,6 +10,8 @@ namespace PCIPT.Windows.Simulation
     {
         public int pointId;
         public double cargoLeft;
+        public double actualCargoLeft;
+        public double allDailyCargo;
         public double fromX;
         public double fromY;
         public double toX;
@@ -20,10 +22,12 @@ namespace PCIPT.Windows.Simulation
         public int fromId;
         public int toId;
 
-        public PointObject(int pointId, double cargoLeft, double fromX, double fromY, double toX, double toY, string cargoType, double utilizationRate, double distance, int fromId, int toId)
+        public PointObject(int pointId, double cargoLeft, double actualCargoLeft, double allDailyCargo, double fromX, double fromY, double toX, double toY, string cargoType, double utilizationRate, double distance, int fromId, int toId)
         {
             this.pointId = pointId;
             this.cargoLeft = cargoLeft;
+            this.actualCargoLeft = actualCargoLeft;
+            this.allDailyCargo = allDailyCargo;
             this.fromX = fromX;
             this.fromY = fromY;
             this.toX = toX;
