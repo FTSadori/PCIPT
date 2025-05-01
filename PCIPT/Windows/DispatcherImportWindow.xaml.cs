@@ -154,10 +154,6 @@ namespace PCIPT.Windows
                             cargoDtos = null;
                             cargoDtos = CsvHandler.GetAllFromFile<CargoDto>(openFileDialog.FileName);
                             break;
-                        case "CargoTurnoverPoints":
-                            cargoTurnoverPointDtos = null;
-                            cargoTurnoverPointDtos = CsvHandler.GetAllFromFile<CargoTurnoverPointDto>(openFileDialog.FileName);
-                            break;
                         case "VehicleTypes":
                             vehicleTypeDtos = null;
                             vehicleTypeDtos = CsvHandler.GetAllFromFile<VehicleTypeDto>(openFileDialog.FileName);
@@ -169,6 +165,10 @@ namespace PCIPT.Windows
                         case "DistributedTasks":
                             distributedTasks = null;
                             distributedTasks = CsvHandler.GetAllFromFile<VehicleByRoutesRow>(openFileDialog.FileName);
+                            break;
+                        case "DailyCargo":
+                            cargoTurnoverPointDtos = null;
+                            cargoTurnoverPointDtos = CsvHandler.GetAllFromFile<CargoTurnoverPointDto>(openFileDialog.FileName);
                             break;
                     }
 
@@ -208,11 +208,6 @@ namespace PCIPT.Windows
         private void CsvButton5_Click(object sender, RoutedEventArgs e)
         {
             AskCSVImport("Cargoes", sender as Button);
-        }
-
-        private void CsvButton6_Click(object sender, RoutedEventArgs e)
-        {
-            AskCSVImport("CargoTurnoverPoints", sender as Button);
         }
 
         private void CsvButton7_Click(object sender, RoutedEventArgs e)
@@ -288,14 +283,6 @@ namespace PCIPT.Windows
             catch (Exception) { Indicator5.Text = "Error"; Indicator5.Foreground = Brushes.Red; }
             try
             {
-                cargoTurnoverPointDtos = null;
-                cargoTurnoverPointDtos = PlannerDataFromDatabaseConverter.ToCargoTurnoverPoints(new SelectAllCargoTurnoverPointsCommand(DbContext.SqlConnection).Execute());
-                Indicator6.Text = "Good";
-                Indicator6.Foreground = Brushes.LightGreen;
-            }
-            catch (Exception) { Indicator6.Text = "Error"; Indicator6.Foreground = Brushes.Red; }
-            try
-            {
                 vehicleTypeDtos = null;
                 vehicleTypeDtos = PlannerDataFromDatabaseConverter.ToVehicleTypes(new SelectAllVehicleTypesCommand(DbContext.SqlConnection).Execute());
                 Indicator7.Text = "Good";
@@ -339,6 +326,11 @@ namespace PCIPT.Windows
 
             Close();
             GraphWindow.This.InitAndRender();
+        }
+
+        private void ImportDailyCargo_Click(object sender, RoutedEventArgs e)
+        {
+            AskCSVImport("DailyCargo", sender as Button);
         }
     }
 }

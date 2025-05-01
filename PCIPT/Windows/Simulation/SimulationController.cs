@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using PCIPT.Windows.Simulation.Observables;
 
 namespace PCIPT.Windows.Simulation
 {
@@ -76,6 +77,8 @@ namespace PCIPT.Windows.Simulation
                 StepForVehicle(sw, vehicle, deltaSeconds * (effectiveTime + random.NextDouble() * (1.0 - effectiveTime)), deltaSeconds);
             }
             sw.Close();
+
+            ToObservableListTranslator.UpdateList(vehicleObjects);
         }
 
         public void StepForVehicle(StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
@@ -201,6 +204,7 @@ namespace PCIPT.Windows.Simulation
                     vehicle.pathIterator = 0;
                     vehicle.lPassed = 0;
                     ChangeState(vehicle, sw, VehicleState.MOVES_WITHOUT_LOAD);
+                    vehicle.load = 0;
                     return deltaSeconds;
                 }
 
@@ -239,6 +243,7 @@ namespace PCIPT.Windows.Simulation
                 vehicle.pathIterator = 0;
                 vehicle.lPassed = 0;
                 ChangeState(vehicle, sw, VehicleState.MOVES_WITH_LOAD);
+                vehicle.load = vehicle.maxLoad * po.utilizationRate;
                 return deltaSeconds;
             }
             else
@@ -273,7 +278,6 @@ namespace PCIPT.Windows.Simulation
                 if (vehicle.pathIterator >= vehicle.path.Count - 1)
                 {
                     var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
-                    vehicle.load = vehicle.maxLoad * po.utilizationRate;
                     vehicle.loadTimeRemaining = vehicle.loadTime;
                     ChangeState(vehicle, sw, VehicleState.UNLOADS);
                     return secondsSaved;

@@ -43,7 +43,8 @@ namespace PCIPT.Calculations.FirstStage.VehicleInRoute
                 if (types == null) 
                     continue;
 
-                float Tc1 = distance * 60f / (vehicle.SpeedWithLoad * 1000f) + distance * 60f / (vehicle.SpeedWithoutLoad * 1000f) + 2f * vehicle.LoadTime;
+                //float Tc1 = distance * 60f / vehicle.SpeedWithLoad + distance * 60f / vehicle.SpeedWithoutLoad + 2f * vehicle.LoadTime;
+                float Tc1 = (distance / (vehicle.SpeedWithLoad) + distance / (vehicle.SpeedWithoutLoad) + 2f * vehicle.LoadTime) / 60f;
                 //float Tc2 = 2f * (distance * 60f / (vehicle.SpeedWithLoad * 1000f)) + 4f * vehicle.LoadTime;
                 float cdaily = MathF.Floor(dailyTimeFund / Tc1);
                 float q = vehicle.LoadCapacity * cargo.CapacityUtilisationRate;

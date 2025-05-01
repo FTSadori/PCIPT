@@ -11,8 +11,10 @@ using PCIPT.Dtos.VehicleTypes;
 using PCIPT.Windows.DataHandlers;
 using PCIPT.Windows.ObjectCreators;
 using PCIPT.Windows.Simulation;
+using PCIPT.Windows.Simulation.Observables;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
@@ -31,7 +33,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace PCIPT.Windows
 {
@@ -117,7 +118,9 @@ namespace PCIPT.Windows
             This = this;
 
             DbContext = dbContext;
-            
+
+            VehiclesDataGrid.ItemsSource = ToObservableListTranslator.ObservableVehicles;
+
             AbleOptionButtons(false);
         }
 
@@ -495,7 +498,7 @@ namespace PCIPT.Windows
 
                         SetTimeSpent(timeSpent + 1.0 / frameRate * simulationSpeed + additionTime);
                         
-                        simulationController.NextStep(1.0 / frameRate * simulationSpeed + additionTime, 0.85);
+                        simulationController.NextStep(1.0 / frameRate * simulationSpeed + additionTime, 1);
                         additionTime = 0;
 
                         vehiclesCoords = simulationController.GetNewGraphVehiclesData();
@@ -512,7 +515,7 @@ namespace PCIPT.Windows
                     DoCmd(delegate ()
                     {
                         PausedText.Visibility = Visibility.Visible;
-                        PausedText.Text = total + " | " + timeElapsed;
+                        PausedText.Text = $"{total} | {timeElapsed:0.00} s";
                     });
 
                     if (total <= 0)
@@ -664,6 +667,28 @@ namespace PCIPT.Windows
             {
                 SpeedTextBox.SetResourceReference(TextBox.BorderBrushProperty, "ErrorGradient");
             }
+        }
+
+        private void CloseAllMenus()
+        {
+            GraphViewGrid.Visibility = Visibility.Hidden;
+            GridControlButtons.Visibility = Visibility.Hidden;
+            VehiclesTableGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void GraphMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseAllMenus();
+            ViewLabel.Text = "Graph view";
+            GraphViewGrid.Visibility = Visibility.Visible;
+            GridControlButtons.Visibility = Visibility.Visible;
+        }
+
+        private void VehiclesMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseAllMenus();
+            ViewLabel.Text = "Vehicles table";
+            VehiclesTableGrid.Visibility = Visibility.Visible;
         }
     }
 }

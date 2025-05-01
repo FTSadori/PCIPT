@@ -89,6 +89,7 @@ namespace PCIPT.Windows
                         PlannerImportWindow.cargoTurnoverPointDtos,
                         PlannerImportWindow.vehicleTypeDtos,
                         PlannerImportWindow.nodeDtos,
+                        dailyCargoTurnoverPoints,
                         vehicleCosts,
                         testPaths,
                         distributedTasks,
@@ -104,6 +105,7 @@ namespace PCIPT.Windows
                         "CargoTurnoverPoints.csv",
                         "VehicleTypes.csv",
                         "Nodes.csv",
+                        "DailyCargoTurnoverPoints.csv",
                         "VehicleCosts.csv",
                         "Pathes.csv",
                         "DistributedTasks.csv",
@@ -188,6 +190,7 @@ namespace PCIPT.Windows
         List<TestPath>? testPaths = null;
         List<VehicleByRoutesRow>? distributedTasks = null;
         List<FinalCostRowEntity>? finalCost = null;
+        List<CargoTurnoverPointDto>? dailyCargoTurnoverPoints = null;
 
         private record TestPath(int From, int To, float Distance);
 
@@ -228,6 +231,13 @@ namespace PCIPT.Windows
 
                 errorMessage = "Calculating final cost";
                 finalCost = FinalCostCalculator.CalculateFinalCost(distributedTasks, PlannerImportWindow.fuelVehicleDtos, PlannerImportWindow.electricVehicleDtos, PlannerImportWindow.timeFund);
+
+                errorMessage = "Generating daily CTP";
+                dailyCargoTurnoverPoints = new();
+                foreach (var ctp in PlannerImportWindow.cargoTurnoverPointDtos)
+                {
+                    dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(ctp.Id, ctp.SourceId, ctp.DestinationId, ctp.OutgoingCargo / PlannerImportWindow.workingDays, ctp.CargoCode));
+                }
             }
             catch (Exception)
             {
@@ -289,10 +299,11 @@ namespace PCIPT.Windows
                 case 5: PlannerImportWindow.cargoTurnoverPointDtos.Add(new CargoTurnoverPointDto(0,0,0,0,0)); break;
                 case 6: PlannerImportWindow.vehicleTypeDtos.Add(new VehicleTypeDto("", "")); break;
                 case 7: PlannerImportWindow.nodeDtos.Add(new NodeDto(0, "")); break;
-                case 8: vehicleCosts.Add(new CostTableRowEntity("",0,0,0,0,0,0)); break;
-                case 9: testPaths.Add(new TestPath(0,0,0)); break;
-                case 10: distributedTasks.Add(new VehicleByRoutesRow("",0,0,0,0,0,0,0,0)); break;
-                case 11: finalCost.Add(new FinalCostRowEntity("",0,0,0,0,0,0,0,0,0)); break;
+                case 8: dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(0, 0, 0, 0, 0)); break;
+                case 9: vehicleCosts.Add(new CostTableRowEntity("",0,0,0,0,0,0)); break;
+                case 10: testPaths.Add(new TestPath(0,0,0)); break;
+                case 11: distributedTasks.Add(new VehicleByRoutesRow("",0,0,0,0,0,0,0,0)); break;
+                case 12: finalCost.Add(new FinalCostRowEntity("",0,0,0,0,0,0,0,0,0)); break;
             }
             CurrentDataGrid.ItemsSource = null;
             CurrentDataGrid.ItemsSource = tables[currentId];
@@ -339,10 +350,11 @@ namespace PCIPT.Windows
                 case 5: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.cargoTurnoverPointDtos); break;
                 case 6: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.vehicleTypeDtos); break;
                 case 7: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], PlannerImportWindow.nodeDtos); break;
-                case 8: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], vehicleCosts); break;
-                case 9: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], testPaths); break;
-                case 10: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], distributedTasks); break;
-                case 11: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], finalCost); break;
+                case 8: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], dailyCargoTurnoverPoints); break;
+                case 9: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], vehicleCosts); break;
+                case 10: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], testPaths); break;
+                case 11: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], distributedTasks); break;
+                case 12: CsvHandler.PutAllToFile(selectedPath + "\\" + tableNames[tableId], finalCost); break;
             }
         }
 
