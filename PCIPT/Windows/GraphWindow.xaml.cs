@@ -448,12 +448,30 @@ namespace PCIPT.Windows
         {
             CurrentSize += 0.1;
             Rerender();
+
+            double width = GraphCanvas.ActualWidth;
+            double height = GraphCanvas.ActualHeight;
+
+            double sizeShiftX = width * CurrentSize / 2 - width / 2;
+            double sizeShiftY = height * CurrentSize / 2 - height / 2;
+
+            RenderVehicles(CurrentSize);
+            ShiftOnlyVehicles(new NegSize(TotalShiftWidth - sizeShiftX, TotalShiftHeight - sizeShiftY));
         }
 
         private void SizeMinus_Click(object sender, RoutedEventArgs e)
         {
             CurrentSize = Math.Max(CurrentSize - 0.1, 0.1);
             Rerender();
+
+            double width = GraphCanvas.ActualWidth;
+            double height = GraphCanvas.ActualHeight;
+
+            double sizeShiftX = width * CurrentSize / 2 - width / 2;
+            double sizeShiftY = height * CurrentSize / 2 - height / 2;
+
+            RenderVehicles(CurrentSize);
+            ShiftOnlyVehicles(new NegSize(TotalShiftWidth - sizeShiftX, TotalShiftHeight - sizeShiftY));
         }
 
         private void SetDefault_Click(object sender, RoutedEventArgs e)
@@ -472,6 +490,9 @@ namespace PCIPT.Windows
 
         int frameRate = 5;
 
+        bool simPaused = false;
+        bool readyToStop = false;
+
         private void StartSimulation()
         {
             simulationThread = new(delegate ()
@@ -479,6 +500,18 @@ namespace PCIPT.Windows
                 Stopwatch stopwatch = new();
                 while (true)
                 {
+                    if (readyToStop)
+                    {
+                        readyToStop = false;
+                        break;
+                    }
+
+                    if (simPaused)
+                    {
+                        Thread.Sleep(100);
+                        continue;
+                    }
+
                     double additionTime = 0;
 
                     double width = GraphCanvas.ActualWidth;
@@ -618,12 +651,13 @@ namespace PCIPT.Windows
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            if (PausedText.Visibility == Visibility.Visible)
+            if (simPaused)
             {
                 PauseButton.Content = "Pause";
                 PauseButton.Width = 50;
                 PauseButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
                 PausedText.Visibility = Visibility.Collapsed;
+                simPaused = false;
             }
             else
             {
@@ -631,6 +665,7 @@ namespace PCIPT.Windows
                 PauseButton.Width = 60;
                 PauseButton.SetResourceReference(BackgroundProperty, "SuccessGradient");
                 PausedText.Visibility = Visibility.Visible;
+                simPaused = true;
             }
         }
 
@@ -639,6 +674,9 @@ namespace PCIPT.Windows
             PauseButton.Content = "Pause";
             PauseButton.Width = 50;
             PauseButton.SetResourceReference(BackgroundProperty, "RoundedTextBoxGrad");
+
+            readyToStop = true;
+            simPaused = false;
 
             AbleControlButton(false);
         }
