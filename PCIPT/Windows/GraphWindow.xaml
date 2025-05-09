@@ -102,7 +102,7 @@
 
                     <Grid Visibility="Hidden" Name="OutputGrid">
                         <ScrollViewer Margin="0 25 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                            <TextBlock Background="Black" Foreground="White" FontSize="12" Name="OutputText" FontFamily="Consolas">[sldjfdlskfj] sdlfkjdslfkjdslkfjdlsfk sdlkf jdslkf jdslf jsdlkf js sdlfkjdslfkjdslkfjdlsfk sdlkf jdslkf jdslf jsdlkf js sdlfkjdslfkjdslkfjdlsfk sdlkf jdslkf jdslf jsdlkf js</TextBlock>
+                            <TextBlock Background="Black" Foreground="White" FontSize="12" Name="OutputText" FontFamily="Consolas"></TextBlock>
                         </ScrollViewer>
                     </Grid>
 
@@ -160,7 +160,7 @@
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="GraphMenuButton" Click="GraphMenuButton_Click">Graph view</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="VehiclesMenuButton" Click="VehiclesMenuButton_Click">Vehicles table</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="PointsMenuButton" Click="PointsMenuButton_Click">Points table</Button>
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Distributes tasks</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="DistributedTasksButton" Click="DistributedTasksButton_Click">Distributed tasks</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="OutputMenuButton" Click="OutputMenuButton_Click">Output</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Charts</Button>

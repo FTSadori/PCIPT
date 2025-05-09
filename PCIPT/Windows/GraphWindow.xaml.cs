@@ -87,6 +87,7 @@ namespace PCIPT.Windows
             {
                 AbleOptionButtons(false);
 
+                TasksDataGrid.ItemsSource = null;
                 Vehicles = null;
                 Cargoes = null;
                 VehicleTypes = null;
@@ -722,6 +723,7 @@ namespace PCIPT.Windows
             VehiclesTableGrid.Visibility = Visibility.Hidden;
             PointsTableGrid.Visibility = Visibility.Hidden;
             OutputGrid.Visibility = Visibility.Hidden;
+            TasksTableGrid.Visibility = Visibility.Hidden;
         }
 
         private void GraphMenuButton_Click(object sender, RoutedEventArgs e)
@@ -751,6 +753,14 @@ namespace PCIPT.Windows
             CloseAllMenus();
             ViewLabel.Text = "Output";
             OutputGrid.Visibility = Visibility.Visible;
+        }
+
+        private void DistributedTasksButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseAllMenus();
+            TasksDataGrid.ItemsSource = DistributedTasks;
+            ViewLabel.Text = "Distributed tasks";
+            TasksTableGrid.Visibility = Visibility.Visible;
         }
     }
 }
