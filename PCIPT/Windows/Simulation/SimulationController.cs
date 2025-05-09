@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using PCIPT.Windows.Simulation.Observables;
+using System.Windows.Controls;
 
 namespace PCIPT.Windows.Simulation
 {
@@ -33,12 +34,14 @@ namespace PCIPT.Windows.Simulation
         private string logFilePath;
 
         private Performance performance = new();
+        private TextBlock output;
 
-        public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, List<int> startPoints, List<NegSize> biases, string logFilePath)
+        public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, List<int> startPoints, List<NegSize> biases, string logFilePath, TextBlock output)
         {
             this.plan = plan;
             this.vehicleTypes = vehicleTypes;
             this.nodesCoords = nodesCoords;
+            this.output = output;
 
             foreach (var dto in pointsDto)
             {
@@ -116,7 +119,7 @@ namespace PCIPT.Windows.Simulation
 
         public void ChangeState(VehicleObject vehicle, StreamWriter sw, VehicleState state)
         {
-            sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) changed state from {vehicle.vehicleState} to {state}");
+            AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) changed state from {vehicle.vehicleState} to {state}");
             vehicle.vehicleState = state;
         }
 
@@ -143,7 +146,7 @@ namespace PCIPT.Windows.Simulation
                     ChangeState(vehicle, sw, VehicleState.OVER);
                     return secondsSaved;
                 }
-                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+                AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
                 return secondsSaved;
             }
             return 0;
@@ -157,7 +160,7 @@ namespace PCIPT.Windows.Simulation
 
             double delta = vehicle.speedWithoutCargo * deltaSeconds / dist;
             vehicle.lPassed += delta;
-            //sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) moved without load by {delta * 100:0.00}% (total of {Math.Min(vehicle.lPassed * 100, 100):0.00}%)");
+            //AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) moved without load by {delta * 100:0.00}% (total of {Math.Min(vehicle.lPassed * 100, 100):0.00}%)");
 
             if (vehicle.lPassed >= 1)
             {
@@ -173,7 +176,7 @@ namespace PCIPT.Windows.Simulation
                     ChangeState(vehicle, sw, VehicleState.LOADS);
                     return secondsSaved;
                 }
-                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+                AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
                 return secondsSaved;
             }
             return 0;
@@ -195,9 +198,9 @@ namespace PCIPT.Windows.Simulation
                     var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.fromId);
                     if (path == null)
                     {
-                        sw.WriteLine($"=========================== ERROR ===========================");
-                        sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
-                        sw.WriteLine($"=============================================================");
+                        AddToLog(sw,$"=========================== ERROR ===========================");
+                        AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
+                        AddToLog(sw,$"=============================================================");
                         return 0;
                     }
 
@@ -234,9 +237,9 @@ namespace PCIPT.Windows.Simulation
                 var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.toId);
                 if (path == null)
                 {
-                    sw.WriteLine($"=========================== ERROR ===========================");
-                    sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.toId}");
-                    sw.WriteLine($"=============================================================");
+                    AddToLog(sw,$"=========================== ERROR ===========================");
+                    AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.toId}");
+                    AddToLog(sw,$"=============================================================");
                     return 0;
                 }
                 po.actualCargoLeft = Math.Max(0, po.actualCargoLeft - vehicle.maxLoad * po.utilizationRate);
@@ -267,7 +270,7 @@ namespace PCIPT.Windows.Simulation
 
             double delta = vehicle.speedWithCargo * deltaSeconds / dist;
             vehicle.lPassed += delta;
-            //sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) moved with load by {delta*100:0.00}% (total of {Math.Min(vehicle.lPassed*100, 100):0.00}%)");
+            //AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId}) moved with load by {delta*100:0.00}% (total of {Math.Min(vehicle.lPassed*100, 100):0.00}%)");
 
             if (vehicle.lPassed >= 1)
             {
@@ -285,7 +288,7 @@ namespace PCIPT.Windows.Simulation
                     return secondsSaved;
                 }
 
-                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
+                AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} in ({vehicle.lastNodeId})");
                 return secondsSaved;
             }
             return 0;
@@ -315,9 +318,9 @@ namespace PCIPT.Windows.Simulation
                     var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.fromId);
                     if (path == null)
                     {
-                        sw.WriteLine($"=========================== ERROR ===========================");
-                        sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
-                        sw.WriteLine($"=============================================================");
+                        AddToLog(sw,$"=========================== ERROR ===========================");
+                        AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
+                        AddToLog(sw,$"=============================================================");
                         return;
                     }
 
@@ -333,9 +336,9 @@ namespace PCIPT.Windows.Simulation
             var path2 = RouteCalculator.GetPathBetween(vehicle.lastNodeId, vehicle.startId);
             if (path2 == null)
             {
-                sw.WriteLine($"=========================== ERROR ===========================");
-                sw.WriteLine($"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {vehicle.startId}");
-                sw.WriteLine($"=============================================================");
+                AddToLog(sw,$"=========================== ERROR ===========================");
+                AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {vehicle.startId}");
+                AddToLog(sw,$"=============================================================");
                 return;
             }
 
@@ -348,8 +351,8 @@ namespace PCIPT.Windows.Simulation
         public void SaveStats()
         {
             StreamWriter sw = new("PERFORMANCE.TXT");
-            sw.WriteLine($"Average load time: {performance.AverageLoadTime}");
-            sw.WriteLine($"Average unload time: {performance.AverageUnloadTime}");
+            AddToLog(sw,$"Average load time: {performance.AverageLoadTime}");
+            AddToLog(sw,$"Average unload time: {performance.AverageUnloadTime}");
             sw.Close();
         }
 
@@ -382,5 +385,14 @@ namespace PCIPT.Windows.Simulation
             return graphVehiclesDatas;
         }
 
+
+        public void AddToLog(StreamWriter sw, string text)
+        {
+            sw.WriteLine(text);
+            GraphWindow.DoCmd(delegate ()
+            {
+                output.Text += text + "\n";
+            });
+        }
     }
 }

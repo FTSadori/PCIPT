@@ -80,6 +80,32 @@
                         </DataGrid>
                     </Grid>
 
+                    <Grid Visibility="Hidden" Name="TasksTableGrid">
+                        <DataGrid Name="TasksDataGrid" Margin="0 25 0 0"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="#FF030323"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+                    </Grid>
+
+                    <Grid Visibility="Hidden" Name="OutputGrid">
+                        <ScrollViewer Margin="0 25 0 0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                            <TextBlock Background="Black" Foreground="White" FontSize="12" Name="OutputText" FontFamily="Consolas">[sldjfdlskfj] sdlfkjdslfkjdslkfjdlsfk sdlkf jdslkf jdslf jsdlkf js sdlfkjdslfkjdslkfjdlsfk sdlkf jdslkf jdslf jsdlkf js sdlfkjdslfkjdslkfjdlsfk sdlkf jdslkf jdslf jsdlkf js</TextBlock>
+                        </ScrollViewer>
+                    </Grid>
+
                     <Grid x:Name="TopPanelOpened" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Top" Height="145" Width="200">
                         <Border BorderBrush="{DynamicResource PrettyBlueGradient}" BorderThickness="2" CornerRadius="0 0 10 10" Background="White">
                             <StackPanel>
@@ -135,7 +161,7 @@
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="VehiclesMenuButton" Click="VehiclesMenuButton_Click">Vehicles table</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="PointsMenuButton" Click="PointsMenuButton_Click">Points table</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Distributes tasks</Button>
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Output</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="OutputMenuButton" Click="OutputMenuButton_Click">Output</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Charts</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess charts</Button>
