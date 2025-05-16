@@ -323,6 +323,7 @@ namespace PCIPT.Windows
             GraphWindow.This.VehicleTypes = vehicleTypeDtos;
             GraphWindow.This.Nodes = nodeDtos;
             GraphWindow.This.DistributedTasks = distributedTasks;
+            GraphWindow.This.DistributedTasksShort = distributedTasks.FindAll(m => m.CargoCode != -1);
 
             Close();
             GraphWindow.This.InitAndRender();

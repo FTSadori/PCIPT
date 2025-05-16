@@ -1,4 +1,5 @@
-﻿using PCIPT.Calculations.FirstStage.CargoStats;
+﻿using CsvHelper.Configuration.Attributes;
+using PCIPT.Calculations.FirstStage.CargoStats;
 using PCIPT.Calculations.FirstStage.CostByVehicle.Dtos;
 using PCIPT.Calculations.FirstStage.RouteFinder;
 using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
@@ -228,6 +229,15 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
 
                     if (remainsTimeFraction < 0.001f)
                         break;
+                }
+            }
+
+            foreach (var pair in MaxVehicles)
+            {
+                while (pair.Value > BusyVehicles[pair.Key].Count)
+                {
+                    BusyVehicles[pair.Key].Add(new(0, 1, 1, 0, 0));
+                    distributionTable.Add(new(pair.Key, BusyVehicles[pair.Key].Count, 1, 0, 0, -1, 0, 0, 0));
                 }
             }
 

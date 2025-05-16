@@ -13,7 +13,7 @@
                 <TextBlock Style="{DynamicResource PrettyText}" FontSize="16" Width="220" TextAlignment="Right" Foreground="{StaticResource RoundedTextBoxGrad}">Daily time fund (m)</TextBlock>
                 <Border Style="{StaticResource PrettyBorder}" Width="60" Height="22" BorderThickness="1">
                     <TextBox CaretBrush="Black" FontFamily="Century Gothic" FontSize="16" Margin="0" Name="DailyTimeFundTextBox">
-                        780
+                        480
                     </TextBox>
                 </Border>
             </StackPanel>

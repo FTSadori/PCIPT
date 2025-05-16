@@ -107,6 +107,7 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
                 vertex = vertexFrom[vertex];
                 Nodes.Add(vertex);
             }
+            Nodes.Reverse();
 
             return new Path(Nodes, vertexSum[endPointId]);
         }

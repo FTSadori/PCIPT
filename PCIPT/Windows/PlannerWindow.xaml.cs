@@ -358,6 +358,26 @@ namespace PCIPT.Windows
             }
         }
 
+        private void PlanMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlanMenuText.Visibility = Visibility.Visible;
+            PlanMenuButton.Visibility = Visibility.Hidden;
+            TableMenuText.Visibility = Visibility.Hidden;
+            TableMenuButton.Visibility = Visibility.Visible;
+            TableMenuBorder.Visibility = Visibility.Hidden;
+            PlanMenuBorder.Visibility = Visibility.Visible;
+        }
+
+        private void TableMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            PlanMenuText.Visibility = Visibility.Hidden;
+            PlanMenuButton.Visibility = Visibility.Visible;
+            TableMenuText.Visibility = Visibility.Visible;
+            TableMenuButton.Visibility = Visibility.Hidden;
+            TableMenuBorder.Visibility = Visibility.Visible;
+            PlanMenuBorder.Visibility = Visibility.Hidden;
+        }
+
         private void InputDataButton_Click(object sender, RoutedEventArgs e)
         {
             new PlannerImportWindow(DbContext).ShowDialog();

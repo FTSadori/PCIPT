@@ -163,8 +163,6 @@
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="DistributedTasksButton" Click="DistributedTasksButton_Click">Distributed tasks</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="OutputMenuButton" Click="OutputMenuButton_Click">Output</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess</Button>
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Charts</Button>
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess charts</Button>
                 </StackPanel>
             </Border>
         </Grid>

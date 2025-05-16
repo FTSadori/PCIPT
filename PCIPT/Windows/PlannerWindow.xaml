@@ -66,13 +66,27 @@
             </Grid.RowDefinitions>
             <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
                 <Grid>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White" Name="CurrentTableText">Current: Empty</TextBlock>
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Margin="5 0 5 0" Style="{DynamicResource RegButton}" BorderThickness="0" Visibility="Hidden" Name="TableMenuButton" Click="TableMenuButton_Click" Background="White" Foreground="{DynamicResource RoundedTextBoxGrad}" FontFamily="Century Gothic" FontSize="20" Width="100">Table</Button>
+                        <Button Margin="5 0 5 0" Style="{DynamicResource RegButton}" BorderThickness="0" Name="PlanMenuButton" Click="PlanMenuButton_Click" Background="White" Foreground="{DynamicResource RoundedTextBoxGrad}" FontFamily="Century Gothic" FontSize="20" Width="100">Plan</Button>
+                    </StackPanel>
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Margin="5 0 5 0" TextAlignment="Center" Name="TableMenuText" Background="Transparent" Foreground="White" FontFamily="Century Gothic" FontSize="20" Width="100">Table</TextBlock>
+                        <TextBlock Margin="5 0 5 0" Visibility="Hidden" TextAlignment="Center" Name="PlanMenuText"  Background="Transparent" Foreground="White" FontFamily="Century Gothic" FontSize="20" Width="100">Plan</TextBlock>
                     </StackPanel>
                 </Grid>
             </Border>
-            <Border Grid.Row="1"  CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">
+            <Border Name="PlanMenuBorder" Grid.Row="1" CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">
                 <Grid>
+                    <ScrollViewer Margin="0 0 0 35" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                        <TextBlock Background="Black" Foreground="White" FontSize="12" Name="PlanText" FontFamily="Consolas"></TextBlock>
+                    </ScrollViewer>
+                    <Button Style="{DynamicResource RegButton}" VerticalAlignment="Bottom" FontSize="18" Padding="2" BorderThickness="0">Export plan</Button>
+                </Grid>
+            </Border>
+            <Border Name="TableMenuBorder" Grid.Row="1" CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">
+                <Grid>
+                    <TextBlock Style="{DynamicResource PrettyText}" VerticalAlignment="Top" FontSize="18" Foreground="{StaticResource RoundedTextBoxGrad}" Name="CurrentTableText">Current: Empty</TextBlock>
                     <DataGrid Name="CurrentDataGrid"
                                   AutoGenerateColumns="True"
                                   CanUserAddRows="True"
@@ -90,6 +104,7 @@
                               VerticalGridLinesBrush="#FF030323"
                               Foreground="#FF030323"
                               FontFamily="Century Gothic"
+                              Margin="0 25 0 0"
                               >
                     </DataGrid>
                     <Button Name="AddRow" Click="AddRow_Click" Margin="8" Style="{StaticResource RegButton}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="24" Height="24" BorderThickness="0">+</Button>

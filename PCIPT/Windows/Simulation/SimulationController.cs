@@ -36,7 +36,7 @@ namespace PCIPT.Windows.Simulation
         private Performance performance = new();
         private TextBlock output;
 
-        public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, List<int> startPoints, List<NegSize> biases, string logFilePath, TextBlock output)
+        public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, Dictionary<string, int> startPoints, List<NegSize> biases, string logFilePath, TextBlock output)
         {
             this.plan = plan;
             this.vehicleTypes = vehicleTypes;
@@ -65,7 +65,9 @@ namespace PCIPT.Windows.Simulation
                 }
                 pairs[dto.Type]++;
 
-                vehicleObjects.Add(new VehicleObject(pairs[dto.Type], dto.Type, vehicle.LoadCapacity, vehicle.LoadTime, vehicle.SpeedWithLoad, vehicle.SpeedWithoutLoad, vehicle.Type, startPoints[i], startPoints[i], biases[i]));
+                //GraphWindow.This.Title += $" {i}:{vehicle.Type}:{startPoints[i]} ";
+                string key = $"{vehicle.Name}[{pairs[dto.Type]}]";
+                vehicleObjects.Add(new VehicleObject(pairs[dto.Type], dto.Type, vehicle.LoadCapacity, vehicle.LoadTime, vehicle.SpeedWithLoad, vehicle.SpeedWithoutLoad, vehicle.Type, startPoints[key], startPoints[key], biases[i]));
                 ++i;
             }
 
@@ -92,7 +94,7 @@ namespace PCIPT.Windows.Simulation
             switch (vehicle.vehicleState)
             {
                 case VehicleState.AWAITS:
-                    Awaits(vehicle, sw);
+                    time = Awaits(vehicle, sw, time);
                     break;
                 case VehicleState.MOVES_WITH_LOAD:
                     time = MovesWithLoad(vehicle, sw, time);
@@ -294,16 +296,21 @@ namespace PCIPT.Windows.Simulation
             return 0;
         }
 
-        public void Awaits(VehicleObject vehicle, StreamWriter sw)
+        public double Awaits(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             var pointsForVehicle = plan.Where(p => p.Name == vehicle.name && p.Number == vehicle.number).ToList();
+            if (pointsForVehicle.Count == 0)
+            {
+                return 0;
+            }
+
             foreach (var point in pointsForVehicle)
             {
                 var po = pointObjects.Where(po => po.pointId == point.PointId).First();
                 if (po.cargoLeft > 0)
                 {
                     // get ahead of time
-                    po.cargoLeft = Math.Max(-0.01, po.cargoLeft - vehicle.maxLoad * po.utilizationRate);
+                    po.cargoLeft = Math.Max(-0.001, po.cargoLeft - vehicle.maxLoad * po.utilizationRate);
                     //
 
                     if (vehicle.lastNodeId == po.fromId)
@@ -312,16 +319,15 @@ namespace PCIPT.Windows.Simulation
                         vehicle.lPassed = 0;
                         vehicle.lastPointId = point.PointId;
                         ChangeState(vehicle, sw, VehicleState.LOADS);
-                        return;
+                        return deltaSeconds;
                     }
 
-                    var path = RouteCalculator.GetPathBetween(vehicle.lastNodeId, po.fromId);
-                    if (path == null)
+                    var path = GetPath(vehicle.lastNodeId, po.fromId, sw, vehicle);
+                    if (path == null) return 0;
+                    if (path.Nodes.Count == 0)
                     {
-                        AddToLog(sw,$"=========================== ERROR ===========================");
-                        AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {po.fromId}");
-                        AddToLog(sw,$"=============================================================");
-                        return;
+                        ChangeState(vehicle, sw, VehicleState.LOADS);
+                        return deltaSeconds;
                     }
 
                     vehicle.path = path.Nodes;
@@ -329,23 +335,49 @@ namespace PCIPT.Windows.Simulation
                     vehicle.lPassed = 0;
                     vehicle.lastPointId = point.PointId;
                     ChangeState(vehicle, sw, VehicleState.MOVES_WITHOUT_LOAD);
-                    return;
+                    return deltaSeconds;
                 }
             }
 
-            var path2 = RouteCalculator.GetPathBetween(vehicle.lastNodeId, vehicle.startId);
-            if (path2 == null)
+            var path2 = GetPath(vehicle.lastNodeId, vehicle.startId, sw, vehicle);
+            if (path2 == null) return 0;
+            if (path2.Nodes.Count == 0)
             {
-                AddToLog(sw,$"=========================== ERROR ===========================");
-                AddToLog(sw,$"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {vehicle.lastNodeId} to node {vehicle.startId}");
-                AddToLog(sw,$"=============================================================");
-                return;
+                ChangeState(vehicle, sw, VehicleState.OVER);
+                return deltaSeconds;
             }
-
+            
             vehicle.path = path2.Nodes;
             vehicle.pathIterator = 0;
             vehicle.lPassed = 0;
             ChangeState(vehicle, sw, VehicleState.MOVES_BACK);
+
+            return deltaSeconds;
+        }
+
+        public RouteCalculator.Path? GetPath(int from, int to, StreamWriter sw, VehicleObject vehicle)
+        {
+            if (from == to)
+            {
+                return new RouteCalculator.Path(new List<int>(), 0);
+            }
+            var path = RouteCalculator.GetPathBetween(from, to);
+            if (path == null)
+            {
+                AddToLog(sw, $"=========================== ERROR ===========================");
+                AddToLog(sw, $"[{DateTime.Now.ToLongTimeString()}] {vehicle.name}:{vehicle.number} can't move from node {from} to node {to}");
+                AddToLog(sw, $"=============================================================");
+                return null;
+            }
+            
+            string str = "";
+            foreach(var p in path.Nodes)
+            {
+                str += p + ">";
+            }
+            AddToLog(sw, $"{vehicle.name}:{vehicle.number} from {from} to {to} but " + str[0..^1] + ":" + path.TotalDistance);
+            
+            return path;
         }
 
         public void SaveStats()

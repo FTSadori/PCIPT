@@ -1,4 +1,5 @@
-﻿using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
+﻿using OxyPlot;
+using PCIPT.Calculations.FirstStage.VehicleByRoutes.Dtos;
 using PCIPT.Dtos.CargoTurnoverPoints;
 using PCIPT.Windows.ObjectCreators;
 using System;
@@ -20,32 +21,44 @@ namespace PCIPT.Windows.DataHandlers
         static Random random = new();
         const double RandomMaxRange = 0.1;
 
-        public static List<GraphVehiclesData> InitConvert(List<VehicleByRoutesRow> vehicleByRoutes, Dictionary<int, NegSize> nodesCoords, List<CargoTurnoverPointDto> points, out List<int> starts, out List<NegSize> biases)
+        public static List<GraphVehiclesData> InitConvert(List<VehicleByRoutesRow> vehicleByRoutes, Dictionary<int, NegSize> nodesCoords, List<CargoTurnoverPointDto> points, out Dictionary<string, int> starts, out List<NegSize> biases)
         {
             List<GraphVehiclesData> result = new();
             starts = new();
             biases = new();
 
             Dictionary<string, List<NegSize>> typesAndStartPoints = new();
+            List<string> machineAlreadyWas = new();
             foreach (var vehicleByRoute in vehicleByRoutes)
             {
+                string key = $"{vehicleByRoute.Name}[{vehicleByRoute.Number}]";
+                if (machineAlreadyWas.Contains(key))
+                {
+                    continue;
+                }
+                machineAlreadyWas.Add(key);
                 if (!typesAndStartPoints.ContainsKey(vehicleByRoute.Name))
                 {
                     typesAndStartPoints.Add(vehicleByRoute.Name, new());
                 }
-                if (typesAndStartPoints[vehicleByRoute.Name].Count < vehicleByRoute.Number)
-                {
-                    double randomAngle = random.NextDouble() * 360.0;
-                    double randomLength = random.NextDouble() * RandomMaxRange;
-                    biases.Add(new(randomLength * Math.Cos(randomAngle), randomLength * Math.Sin(randomAngle)));
-                    NegSize randomizedCoords = new(
-                        nodesCoords[vehicleByRoute.PointId].Width + randomLength * Math.Cos(randomAngle),
-                        nodesCoords[vehicleByRoute.PointId].Height + randomLength * Math.Sin(randomAngle));
-                    typesAndStartPoints[vehicleByRoute.Name].Add(randomizedCoords);
 
+                if (vehicleByRoute.CargoCode != -1)
+                {
                     var po = points.Where(p => p.Id == vehicleByRoute.PointId).First();
-                    starts.Add(po.SourceId);
+                    starts.Add(key, po.SourceId);
                 }
+                else
+                {
+                    starts.Add(key, vehicleByRoute.PointId);
+                }
+
+                double randomAngle = random.NextDouble() * 360.0;
+                double randomLength = random.NextDouble() * RandomMaxRange;
+                biases.Add(new(randomLength * Math.Cos(randomAngle), randomLength * Math.Sin(randomAngle)));
+                NegSize randomizedCoords = new(
+                    nodesCoords[starts.Last().Value].Width + randomLength * Math.Cos(randomAngle),
+                    nodesCoords[starts.Last().Value].Height + randomLength * Math.Sin(randomAngle));
+                typesAndStartPoints[vehicleByRoute.Name].Add(randomizedCoords);
             }
 
             foreach (var type in typesAndStartPoints)

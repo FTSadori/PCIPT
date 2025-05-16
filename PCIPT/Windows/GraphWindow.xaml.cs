@@ -54,12 +54,13 @@ namespace PCIPT.Windows
         private List<GraphVehiclesData> vehiclesCoords = new();
         private List<NegSize> realNodesSize = new();
 
-        private List<int> starts;
+        private Dictionary<string, int> starts;
         private List<NegSize> biases;
 
         public List<NodeDto> Nodes;
         public List<RouteDto> Routes;
         public List<VehicleByRoutesRow> DistributedTasks;
+        public List<VehicleByRoutesRow> DistributedTasksShort;
         public List<NodesCoordsDto> NodesCoords;
         public List<CargoTurnoverPointDto> CargoPoints;
         public List<VehicleTypeDto> VehicleTypes;
@@ -639,7 +640,7 @@ namespace PCIPT.Windows
             ToObservablePointsListTranslator.cargoTurnoverPointDtos = CargoPoints;
 
             RouteCalculator.InitRoutes(Routes, Nodes);
-            simulationController = new(DistributedTasks, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT", OutputText);
+            simulationController = new(DistributedTasksShort, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT", OutputText);
             StartSimulation();
             SetTimeSpent(0);
 
@@ -758,7 +759,7 @@ namespace PCIPT.Windows
         private void DistributedTasksButton_Click(object sender, RoutedEventArgs e)
         {
             CloseAllMenus();
-            TasksDataGrid.ItemsSource = DistributedTasks;
+            TasksDataGrid.ItemsSource = DistributedTasksShort;
             ViewLabel.Text = "Distributed tasks";
             TasksTableGrid.Visibility = Visibility.Visible;
         }
