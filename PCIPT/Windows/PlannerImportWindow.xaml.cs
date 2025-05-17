@@ -56,11 +56,6 @@ namespace PCIPT.Windows
             vehicleDtos = null;
         }
 
-        private void ClearAllColors()
-        {
-            // todo
-        }
-
         private void CsvButton_Click(object sender, RoutedEventArgs e)
         {
             BorderCsv.Visibility = Visibility.Visible;

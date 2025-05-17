@@ -17,7 +17,7 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
         private enum CostType
         {
             HydraulicOilConsumption,
-            SpecialOilConsumption,
+            RepairCosts,
             TransmissionOilConsumption,
             MotorOilConsumption,
             BaseElectricityConsumption,
@@ -30,7 +30,7 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
             float[] costs = new float[(int)CostType.MaxCostTypes];
 
             costs[(int)CostType.HydraulicOilConsumption] = dto.HydraulicOilConsumption;
-            costs[(int)CostType.SpecialOilConsumption] = dto.SpecialOilConsumption;
+            costs[(int)CostType.RepairCosts] = dto.RepairCosts;
             costs[(int)CostType.TransmissionOilConsumption] = dto.TransmissionOilConsumption;
         
             FuelVehicleDto? fuelVehicleDto = dto as FuelVehicleDto;
@@ -65,7 +65,7 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
             return new CostTableRowEntity(tableRow.Name,
                 tableRow.Costs[(int)CostType.HydraulicOilConsumption],
                 tableRow.Costs[(int)CostType.TransmissionOilConsumption],
-                tableRow.Costs[(int)CostType.SpecialOilConsumption],
+                tableRow.Costs[(int)CostType.RepairCosts],
                 tableRow.Costs[(int)CostType.BaseElectricityConsumption],
                 tableRow.Costs[(int)CostType.MotorOilConsumption],
                 tableRow.Costs[(int)CostType.FuelConsumption]);
@@ -73,10 +73,6 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
 
         public static List<CostTableRowEntity> CalculateCostsByVehicles(List<VehicleDto> vehicleDtos, List<CostWeightDto> costWeightDtos)
         {
-            // Створюємо порожній масив максимальних витрат в кожному стовпцю
-            float[] maxCosts = new float[(int)CostType.MaxCostTypes];
-            for (int i = 0; i < maxCosts.Length; i++) maxCosts[i] = 0f;
-
             var costTable = new List<CostTableRow>();
 
             // Кожне ТЗ перетворюємо у необхідний тип та шукаємо максимальні значення по стовпцям
@@ -84,15 +80,12 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
             {
                 var line = ConvertVehicleToCostData(vehicleDto);
 
-                for (int i = 0; i < maxCosts.Length; i++)
-                    maxCosts[i] = Math.Max(maxCosts[i], line.Costs[i]);
-
                 costTable.Add(line);
             }
 
             // Знаходимо у таблиці ваги для всіх витрат, крім палива
             float[] costsWeight = new float[(int)CostType.MaxCostTypes];
-            for (int i = 0; i < maxCosts.Length; i++)
+            for (int i = 0; i < (int)CostType.MaxCostTypes; i++)
             {
                 if (i != (int)CostType.FuelConsumption)
                     costsWeight[i] = costWeightDtos.Find(d => d.Name == Enum.GetName(typeof(CostType), i))?.Weight ?? 1f;
@@ -103,11 +96,6 @@ namespace PCIPT.Calculations.FirstStage.LossByVehicle
             {
                 for (int i = 0; i < costRow.Costs.Length; i++)
                 {
-                    if (maxCosts[i] <= 0.00001f)
-                        continue;
-
-                    costRow.Costs[i] /= maxCosts[i];
-
                     if (i == (int)CostType.FuelConsumption)
                     {
                         if (costRow.FuelType != "")

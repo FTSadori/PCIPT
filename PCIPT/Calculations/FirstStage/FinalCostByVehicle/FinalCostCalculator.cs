@@ -26,18 +26,29 @@ namespace PCIPT.Calculations.FirstStage.FinalCostByVehicle
 
             Dictionary<string, float> vehiclesTotalFraction = new();
             Dictionary<string, int> vehiclesCount = new();
-            float[] totalStats = new float[9];
+            float[] totalStats = new float[10];
+
+            Dictionary<string, int> vehiclesUsedCount = new();
 
             foreach (var vehicle in vehiclesByRoutes)
             {
                 if (vehiclesCount.ContainsKey(vehicle.Name))
                 {
                     vehiclesCount[vehicle.Name] = Math.Max(vehiclesCount[vehicle.Name], vehicle.Number);
+                    if (vehicle.CargoCode != -1)
+                    {
+                        vehiclesUsedCount[vehicle.Name] = Math.Max(vehiclesUsedCount[vehicle.Name], vehicle.Number);
+                    }
                     vehiclesTotalFraction[vehicle.Name] += vehicle.FractionOfTimeUsed;
                 }
                 else 
                 {
                     vehiclesCount[vehicle.Name] = 1;
+                    if (vehicle.CargoCode != -1)
+                    {
+                        vehiclesUsedCount[vehicle.Name] = 1;
+                    }
+                    else vehiclesUsedCount[vehicle.Name] = 0; 
                     vehiclesTotalFraction[vehicle.Name] = vehicle.FractionOfTimeUsed;
                 }
             }
@@ -45,13 +56,13 @@ namespace PCIPT.Calculations.FirstStage.FinalCostByVehicle
             foreach (var vtFraction in vehiclesTotalFraction)
             {
                 string name = vtFraction.Key;
-                float f = vtFraction.Value;
+                float f = vtFraction.Value / 60 * dailyTimeFund;
 
                 var fueldto = fuelVehicles.Find(v => v.Name == name);
                 if (fueldto != null)
                 {
-                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesCount[name], f, f * dailyTimeFund,
-                        f * fueldto.HydraulicOilConsumption, f * fueldto.TransmissionOilConsumption, f * fueldto.SpecialOilConsumption,
+                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesUsedCount[name], vehiclesCount[name], f, f * dailyTimeFund,
+                        f * fueldto.HydraulicOilConsumption, f * fueldto.TransmissionOilConsumption, f * fueldto.RepairCosts,
                         0f, f * fueldto.MotorOilConsumption, f * fueldto.FuelConsumption));
                     continue;
                 }
@@ -59,28 +70,29 @@ namespace PCIPT.Calculations.FirstStage.FinalCostByVehicle
                 var elecdto = electricVehicles.Find(v => v.Name == name);
                 if (elecdto != null)
                 {
-                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesCount[name], f, f * dailyTimeFund,
-                        f * elecdto.HydraulicOilConsumption, f * elecdto.TransmissionOilConsumption, f * elecdto.SpecialOilConsumption,
+                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesUsedCount[name], vehiclesCount[name], f, f * dailyTimeFund,
+                        f * elecdto.HydraulicOilConsumption, f * elecdto.TransmissionOilConsumption, f * elecdto.RepairCosts,
                         f * elecdto.BaseElectricityConsumption, 0f, 0f));
                 }
             }
 
             foreach (var v in finalCostRows) 
             {
-                totalStats[0] += v.TotalNumber;
-                totalStats[1] += v.TotalFraction;
-                totalStats[2] += v.TotalTime;
-                totalStats[3] += v.HydraulicOilConsumption;
-                totalStats[4] += v.TransmissionOilConsumption;
-                totalStats[5] += v.SpecialOilConsumption;
-                totalStats[6] += v.BaseElectricityConsumption;
-                totalStats[7] += v.MotorOilConsumption;
-                totalStats[8] += v.FuelConsumption;
+                totalStats[0] += v.UsedNumber;
+                totalStats[1] += v.TotalNumber;
+                totalStats[2] += v.TotalFraction;
+                totalStats[3] += v.TotalTime;
+                totalStats[4] += v.HydraulicOilConsumption;
+                totalStats[5] += v.TransmissionOilConsumption;
+                totalStats[6] += v.RepairCosts;
+                totalStats[7] += v.BaseElectricityConsumption;
+                totalStats[8] += v.MotorOilConsumption;
+                totalStats[9] += v.FuelConsumption;
             }
 
-            finalCostRows.Add(new FinalCostRowEntity("Total", (int)totalStats[0], totalStats[1], totalStats[2],
-                totalStats[3], totalStats[4], totalStats[5],
-                totalStats[6], totalStats[7], totalStats[8]));
+            finalCostRows.Add(new FinalCostRowEntity("Total", (int)totalStats[0], (int)totalStats[1], totalStats[2], totalStats[3],
+                totalStats[4], totalStats[5], totalStats[6],
+                totalStats[7], totalStats[8], totalStats[9]));
 
             return finalCostRows;
         }

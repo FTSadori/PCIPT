@@ -8,12 +8,13 @@ namespace PCIPT.Calculations.FirstStage.FinalCostByVehicle.Dtos
 {
     public sealed record FinalCostRowEntity(
         string Name, 
-        int TotalNumber, 
+        int UsedNumber,
+        int TotalNumber,
         float TotalFraction,
         float TotalTime,
         float HydraulicOilConsumption,
         float TransmissionOilConsumption, 
-        float SpecialOilConsumption, 
+        float RepairCosts, 
         float BaseElectricityConsumption, 
         float MotorOilConsumption,
         float FuelConsumption

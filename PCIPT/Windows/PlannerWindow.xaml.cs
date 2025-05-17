@@ -109,8 +109,10 @@ namespace PCIPT.Windows
                         "VehicleCosts.csv",
                         "Pathes.csv",
                         "DistributedTasks.csv",
-                        "FinalConsts.csv",
+                        "FinalCosts.csv",
                     };
+
+                    UpdateOutputText();
 
                     AbleOptionButtons(true);
 
@@ -130,6 +132,94 @@ namespace PCIPT.Windows
             else
             {
                 ErrorText.Text = "Error while " + message1;
+            }
+        }
+
+        public void UpdateOutputText()
+        {
+            PlanText.Text = "";
+
+            PlanText.Text += "Необхідна техніка:\n";
+            foreach (var costLine in finalCost)
+            {
+                if (costLine.UsedNumber > 0)
+                {
+                    if (costLine.Name == "Total")
+                    {
+                        PlanText.Text += $"  Загалом: {costLine.UsedNumber} шт.\n";
+                    }
+                    else
+                        PlanText.Text += $"- {costLine.Name} ({costLine.UsedNumber} шт.)\n";
+                }
+            }
+
+            PlanText.Text += "\nВантажопотоки:\n";
+            double totalDaily = 0;
+            double totalMonthly = 0;
+            double total = 0;
+            foreach (var point in PlannerImportWindow.cargoTurnoverPointDtos)
+            {
+                var source = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.SourceId);
+                var dest = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.DestinationId);
+                var cargo = PlannerImportWindow.cargoDtos.Find(n => n.Code == point.CargoCode);
+
+                PlanText.Text += $"- Потік \"{source.Name}->{dest.Name}\" ({cargo.Name}):\n";
+                var daily = point.OutgoingCargo / PlannerImportWindow.workingDays;
+                if (PlannerImportWindow.workingDays >= 30)
+                {
+                    PlanText.Text += $"  Обсяг:  \t{daily:0}\t{daily * 30:0}\t{point.OutgoingCargo:0} (т)\n";
+                    totalMonthly += daily * 30;
+                }
+                else
+                {
+                    PlanText.Text += $"  Обсяг:  \t{daily:0}\t-\t{point.OutgoingCargo:0} (т)\n";
+                }
+                totalDaily += daily;
+                total += point.OutgoingCargo;
+            }
+            PlanText.Text += $"  Загалом:\t{totalDaily:0}\t{totalMonthly:0}\t{total:0} (т)\n";
+
+            double allTimeInHours = PlannerImportWindow.timeFund / 60 * PlannerImportWindow.workingDays;
+            PlanText.Text += "\nВитрати:\n";
+            var totalLine = finalCost.Find(c => c.Name == "Total");
+            PlanText.Text += $"- Витрати на електрику: {totalLine.BaseElectricityConsumption:0.00} грн\n";
+            PlanText.Text += $"- Витрати на паливо: {totalLine.FuelConsumption:0.00} грн\n";
+            PlanText.Text += $"- Витрати на ремонти: {totalLine.RepairCosts:0.00} грн\n";
+            PlanText.Text += $"- Витрати на оливи: {totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption:0.00} грн\n";
+            PlanText.Text += $"  Загалом: {totalLine.BaseElectricityConsumption + totalLine.FuelConsumption + totalLine.RepairCosts + totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption:0.00} грн\n";
+
+            PlanText.Text += "\nЩоденний план перевезень:\n";
+            var spareList = distributedTasks.ToList();
+            spareList.Sort((a, b) => $"{a.Name}[{a.Number}]".CompareTo($"{b.Name}[{b.Number}]"));
+            string lastVehicle = "";
+            int iterator = 1;
+            foreach (var task in spareList)
+            {
+                if (task.CargoCode == -1)
+                {
+                    continue;
+                }
+
+                string thisVehicle = $"{task.Name} [{task.Number}]";
+                if (thisVehicle != lastVehicle)
+                {
+                    lastVehicle = thisVehicle;
+                    iterator = 0;
+                    PlanText.Text += $"- {lastVehicle}:\n";
+                }
+
+                var point = PlannerImportWindow.cargoTurnoverPointDtos.Find(n => n.Id == task.PointId);
+                var source = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.SourceId);
+                if (iterator == 0)
+                {
+                    PlanText.Text += $"{iterator++}. Знаходиться початково в пункті \"{source.Name}\" (id {source.Id})\n";
+                }
+                var dest = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.DestinationId);
+                var cargo = PlannerImportWindow.cargoDtos.Find(n => n.Code == task.CargoCode);
+                var veh = PlannerImportWindow.vehicleDtos.Find(n => n.Name == task.Name);
+
+                PlanText.Text += $"{iterator++}. Виконує перевезення на потоці \"{source.Name}->{dest.Name}\" ({cargo.Name})\n";
+                PlanText.Text += $"\tМає виконати {task.NumberOfCycles} циклів перевезень по {veh.LoadCapacity * cargo.CapacityUtilisationRate:0.00} т вантажу.\n\tЗагалом до {veh.LoadCapacity * cargo.CapacityUtilisationRate * task.NumberOfCycles:0.00} т вантажу.\n";
             }
         }
 
@@ -239,9 +329,9 @@ namespace PCIPT.Windows
                     dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(ctp.Id, ctp.SourceId, ctp.DestinationId, ctp.OutgoingCargo / PlannerImportWindow.workingDays, ctp.CargoCode));
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return errorMessage;
+                return errorMessage + ": " + ex.Message;
             }
             return "";
         }
@@ -303,7 +393,7 @@ namespace PCIPT.Windows
                 case 9: vehicleCosts.Add(new CostTableRowEntity("",0,0,0,0,0,0)); break;
                 case 10: testPaths.Add(new TestPath(0,0,0)); break;
                 case 11: distributedTasks.Add(new VehicleByRoutesRow("",0,0,0,0,0,0,0,0)); break;
-                case 12: finalCost.Add(new FinalCostRowEntity("",0,0,0,0,0,0,0,0,0)); break;
+                case 12: finalCost.Add(new FinalCostRowEntity("",0,0,0,0,0,0,0,0,0,0)); break;
             }
             CurrentDataGrid.ItemsSource = null;
             CurrentDataGrid.ItemsSource = tables[currentId];
