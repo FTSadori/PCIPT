@@ -81,7 +81,7 @@
                     <ScrollViewer Margin="0 0 0 35" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                         <TextBlock Background="Black" Foreground="White" FontSize="12" Name="PlanText" FontFamily="Consolas"></TextBlock>
                     </ScrollViewer>
-                    <Button Style="{DynamicResource RegButton}" VerticalAlignment="Bottom" FontSize="18" Padding="2" BorderThickness="0">Export plan</Button>
+                    <Button Style="{DynamicResource RegButton}" VerticalAlignment="Bottom" FontSize="18" Padding="2" BorderThickness="0" Name="ExportPlanButton" Click="ExportPlanButton_Click">Export plan</Button>
                 </Grid>
             </Border>
             <Border Name="TableMenuBorder" Grid.Row="1" CornerRadius="0 0 5 5" Background="White" Padding="5 5 5 5">

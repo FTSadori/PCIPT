@@ -81,6 +81,8 @@ namespace PCIPT.Windows
         }
 
         public static int workingDays = 0;
+        public static int workShifts = 0;
+        public static float timeUsageFraction = 0;
         public static float timeFund = 0f;
         public static List<CostWeightDto>? costWeightDtos = null;
         public static List<FuelVehicleDto>? fuelVehicleDtos = null;
@@ -220,6 +222,13 @@ namespace PCIPT.Windows
 
             try { timeFund = float.Parse(DailyTimeFundTextBox.Text); }
             catch (Exception) { DailyTimeFundTextBox.Foreground = Brushes.Red; error = true; }
+
+            try { workShifts = int.Parse(WorkShiftsTextBox.Text); }
+            catch (Exception) { WorkShiftsTextBox.Foreground = Brushes.Red; error = true; }
+
+            try { timeUsageFraction = float.Parse(TimeUsageTextBox.Text); }
+            catch (Exception) { TimeUsageTextBox.Foreground = Brushes.Red; error = true; }
+
 
             //try { maxDailyCargo = float.Parse(MaxDailyCargoTextBox.Text); }
             //catch (Exception) { MaxDailyCargoTextBox.Foreground = Brushes.Red; error = true; }

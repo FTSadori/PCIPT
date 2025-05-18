@@ -52,12 +52,10 @@ namespace PCIPT.Windows.DataHandlers
                     starts.Add(key, vehicleByRoute.PointId);
                 }
 
-                double randomAngle = random.NextDouble() * 360.0;
-                double randomLength = random.NextDouble() * RandomMaxRange;
-                biases.Add(new(randomLength * Math.Cos(randomAngle), randomLength * Math.Sin(randomAngle)));
+                biases.Add(new(0,0));
                 NegSize randomizedCoords = new(
-                    nodesCoords[starts.Last().Value].Width + randomLength * Math.Cos(randomAngle),
-                    nodesCoords[starts.Last().Value].Height + randomLength * Math.Sin(randomAngle));
+                    nodesCoords[starts.Last().Value].Width,
+                    nodesCoords[starts.Last().Value].Height);
                 typesAndStartPoints[vehicleByRoute.Name].Add(randomizedCoords);
             }
 

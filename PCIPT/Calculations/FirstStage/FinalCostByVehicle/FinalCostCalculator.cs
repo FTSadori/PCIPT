@@ -61,7 +61,7 @@ namespace PCIPT.Calculations.FirstStage.FinalCostByVehicle
                 var fueldto = fuelVehicles.Find(v => v.Name == name);
                 if (fueldto != null)
                 {
-                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesUsedCount[name], vehiclesCount[name], f, f * dailyTimeFund,
+                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesUsedCount[name], vehiclesCount[name], vtFraction.Value, f * dailyTimeFund,
                         f * fueldto.HydraulicOilConsumption, f * fueldto.TransmissionOilConsumption, f * fueldto.RepairCosts,
                         0f, f * fueldto.MotorOilConsumption, f * fueldto.FuelConsumption));
                     continue;
@@ -70,7 +70,7 @@ namespace PCIPT.Calculations.FirstStage.FinalCostByVehicle
                 var elecdto = electricVehicles.Find(v => v.Name == name);
                 if (elecdto != null)
                 {
-                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesUsedCount[name], vehiclesCount[name], f, f * dailyTimeFund,
+                    finalCostRows.Add(new FinalCostRowEntity(name, vehiclesUsedCount[name], vehiclesCount[name], vtFraction.Value, f * dailyTimeFund,
                         f * elecdto.HydraulicOilConsumption, f * elecdto.TransmissionOilConsumption, f * elecdto.RepairCosts,
                         f * elecdto.BaseElectricityConsumption, 0f, 0f));
                 }

@@ -16,8 +16,6 @@ namespace PCIPT.Windows.Simulation.Observables
         private int pointId;
         private int lastNodeId;
         private float currentLoad;
-        private float currentSpeed;
-        private float timeSinceLastStateChange;
         
         public int Id
         {
@@ -59,18 +57,6 @@ namespace PCIPT.Windows.Simulation.Observables
         {
             get { return currentLoad; }
             set { currentLoad = value; OnPropertyChanged(nameof(CurrentLoad)); }
-        }
-
-        public float CurrentSpeed
-        {
-            get { return currentSpeed; }
-            set { currentSpeed = value; OnPropertyChanged(nameof(CurrentSpeed)); }
-        }
-
-        public float TimeSinceLastStateChange
-        {
-            get { return timeSinceLastStateChange; }
-            set { timeSinceLastStateChange = value; OnPropertyChanged(nameof(TimeSinceLastStateChange)); }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

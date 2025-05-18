@@ -25,13 +25,13 @@ namespace PCIPT.Windows.Simulation.Observables
         public string Source
         {
             get => source;
-            set { source = value; OnPropertyChanged(nameof(Source)); }
+            set { source = value.Replace('/', ' '); OnPropertyChanged(nameof(Source)); }
         }
 
         public string Destination
         {
             get => destination;
-            set { destination = value; OnPropertyChanged(nameof(Destination)); }
+            set { destination = value.Replace('/', ' '); OnPropertyChanged(nameof(Destination)); }
         }
 
         public float CargoLeft

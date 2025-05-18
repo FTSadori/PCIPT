@@ -59,6 +59,7 @@ namespace PCIPT.Windows
 
         public void ShowTable(int id)
         {
+            TableMenuButton_Click(new object(), new());
             currentId = id;
             CurrentTableText.Text = $"Current: {tableNames[id]}";
             CurrentDataGrid.ItemsSource = tables[id];
@@ -105,7 +106,7 @@ namespace PCIPT.Windows
                         "CargoTurnoverPoints.csv",
                         "VehicleTypes.csv",
                         "Nodes.csv",
-                        "DailyCargoTurnoverPoints.csv",
+                        "ShiftCargoTurnoverPoints.csv",
                         "VehicleCosts.csv",
                         "Pathes.csv",
                         "DistributedTasks.csv",
@@ -163,30 +164,29 @@ namespace PCIPT.Windows
                 var dest = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.DestinationId);
                 var cargo = PlannerImportWindow.cargoDtos.Find(n => n.Code == point.CargoCode);
 
-                PlanText.Text += $"- Потік \"{source.Name}->{dest.Name}\" ({cargo.Name}):\n";
+                PlanText.Text += $"- Потік \"{source.Name.Replace('/', ' ')}->{dest.Name.Replace('/', ' ')}\" ({cargo.Name}):\n";
                 var daily = point.OutgoingCargo / PlannerImportWindow.workingDays;
                 if (PlannerImportWindow.workingDays >= 30)
                 {
-                    PlanText.Text += $"  Обсяг:  \t{daily:0}\t{daily * 30:0}\t{point.OutgoingCargo:0} (т)\n";
+                    PlanText.Text += $"  Обсяг:  \t{daily / PlannerImportWindow.workShifts:0}\t{daily:0}\t{daily * 30:0}\t{point.OutgoingCargo:0} (т)\n";
                     totalMonthly += daily * 30;
                 }
                 else
                 {
-                    PlanText.Text += $"  Обсяг:  \t{daily:0}\t-\t{point.OutgoingCargo:0} (т)\n";
+                    PlanText.Text += $"  Обсяг:  \t{daily / PlannerImportWindow.workShifts:0}\t{daily:0}\t-\t{point.OutgoingCargo:0} (т)\n";
                 }
                 totalDaily += daily;
                 total += point.OutgoingCargo;
             }
-            PlanText.Text += $"  Загалом:\t{totalDaily:0}\t{totalMonthly:0}\t{total:0} (т)\n";
+            PlanText.Text += $"  Загалом:\t{totalDaily / PlannerImportWindow.workShifts:0}\t{totalDaily:0}\t{totalMonthly:0}\t{total:0} (т)\n";
 
-            double allTimeInHours = PlannerImportWindow.timeFund / 60 * PlannerImportWindow.workingDays;
             PlanText.Text += "\nВитрати:\n";
             var totalLine = finalCost.Find(c => c.Name == "Total");
-            PlanText.Text += $"- Витрати на електрику: {totalLine.BaseElectricityConsumption:0.00} грн\n";
-            PlanText.Text += $"- Витрати на паливо: {totalLine.FuelConsumption:0.00} грн\n";
-            PlanText.Text += $"- Витрати на ремонти: {totalLine.RepairCosts:0.00} грн\n";
-            PlanText.Text += $"- Витрати на оливи: {totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption:0.00} грн\n";
-            PlanText.Text += $"  Загалом: {totalLine.BaseElectricityConsumption + totalLine.FuelConsumption + totalLine.RepairCosts + totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption:0.00} грн\n";
+            PlanText.Text += $"- Витрати на електрику: {totalLine.BaseElectricityConsumption * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Витрати на паливо: {totalLine.FuelConsumption * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Витрати на ремонти: {totalLine.RepairCosts * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Витрати на оливи: {(totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"  Загалом: {(totalLine.BaseElectricityConsumption + totalLine.FuelConsumption + totalLine.RepairCosts + totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
 
             PlanText.Text += "\nЩоденний план перевезень:\n";
             var spareList = distributedTasks.ToList();
@@ -212,13 +212,13 @@ namespace PCIPT.Windows
                 var source = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.SourceId);
                 if (iterator == 0)
                 {
-                    PlanText.Text += $"{iterator++}. Знаходиться початково в пункті \"{source.Name}\" (id {source.Id})\n";
+                    PlanText.Text += $"{iterator++}. Знаходиться початково в пункті \"{source.Name.Replace('/', ' ')}\" (id {source.Id})\n";
                 }
                 var dest = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.DestinationId);
                 var cargo = PlannerImportWindow.cargoDtos.Find(n => n.Code == task.CargoCode);
                 var veh = PlannerImportWindow.vehicleDtos.Find(n => n.Name == task.Name);
 
-                PlanText.Text += $"{iterator++}. Виконує перевезення на потоці \"{source.Name}->{dest.Name}\" ({cargo.Name})\n";
+                PlanText.Text += $"{iterator++}. Виконує перевезення на потоці \"{source.Name.Replace('/', ' ')}->{dest.Name.Replace('/', ' ')}\" ({cargo.Name})\n";
                 PlanText.Text += $"\tМає виконати {task.NumberOfCycles} циклів перевезень по {veh.LoadCapacity * cargo.CapacityUtilisationRate:0.00} т вантажу.\n\tЗагалом до {veh.LoadCapacity * cargo.CapacityUtilisationRate * task.NumberOfCycles:0.00} т вантажу.\n";
             }
         }
@@ -310,23 +310,23 @@ namespace PCIPT.Windows
                 }
 
                 errorMessage = "Calculating vehicle stats by points";
-                var vehiclesByRoutes = VehiclesByRoutesCalculator.CalculateVehicleStatsByPoints(PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.cargoDtos, PlannerImportWindow.vehicleDtos, PlannerImportWindow.vehicleTypeDtos, vehicleCosts, PlannerImportWindow.timeFund, PlannerImportWindow.workingDays);
+                var vehiclesByRoutes = VehiclesByRoutesCalculator.CalculateVehicleStatsByPoints(PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.cargoDtos, PlannerImportWindow.vehicleDtos, PlannerImportWindow.vehicleTypeDtos, vehicleCosts, PlannerImportWindow.timeFund * PlannerImportWindow.timeUsageFraction, PlannerImportWindow.workingDays * PlannerImportWindow.workShifts);
                 foreach (var vehicleByRoutes in vehiclesByRoutes)
                 {
                     CsvHandler.PutAllToFile(vehicleByRoutes.Key.FileName, vehicleByRoutes.Value);
                 }
 
                 errorMessage = "Distributing tasks by vehicles";
-                distributedTasks = VehiclesByRoutesCalculator.DistributeTasksByVehicles(vehiclesByRoutes, PlannerImportWindow.vehicleDtos, PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.timeFund);
+                distributedTasks = VehiclesByRoutesCalculator.DistributeTasksByVehicles(vehiclesByRoutes, PlannerImportWindow.vehicleDtos, PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.timeFund * PlannerImportWindow.timeUsageFraction, PlannerImportWindow.workingDays * PlannerImportWindow.workShifts);
 
                 errorMessage = "Calculating final cost";
-                finalCost = FinalCostCalculator.CalculateFinalCost(distributedTasks, PlannerImportWindow.fuelVehicleDtos, PlannerImportWindow.electricVehicleDtos, PlannerImportWindow.timeFund);
+                finalCost = FinalCostCalculator.CalculateFinalCost(distributedTasks, PlannerImportWindow.fuelVehicleDtos, PlannerImportWindow.electricVehicleDtos, PlannerImportWindow.timeFund * PlannerImportWindow.timeUsageFraction);
 
                 errorMessage = "Generating daily CTP";
                 dailyCargoTurnoverPoints = new();
                 foreach (var ctp in PlannerImportWindow.cargoTurnoverPointDtos)
                 {
-                    dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(ctp.Id, ctp.SourceId, ctp.DestinationId, ctp.OutgoingCargo / PlannerImportWindow.workingDays, ctp.CargoCode));
+                    dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(ctp.Id, ctp.SourceId, ctp.DestinationId, ctp.OutgoingCargo / PlannerImportWindow.workingDays / PlannerImportWindow.workShifts, ctp.CargoCode));
                 }
             }
             catch (Exception ex)
@@ -466,6 +466,17 @@ namespace PCIPT.Windows
             TableMenuButton.Visibility = Visibility.Hidden;
             TableMenuBorder.Visibility = Visibility.Visible;
             PlanMenuBorder.Visibility = Visibility.Hidden;
+        }
+
+        private void ExportPlanButton_Click(object sender, RoutedEventArgs e)
+        {
+            string selectedPath = SelectPathToExport();
+
+            if (selectedPath == "") return;
+
+            StreamWriter sw = new(selectedPath + "\\plan.txt");
+            sw.WriteLine(PlanText.Text);
+            sw.Close();
         }
 
         private void InputDataButton_Click(object sender, RoutedEventArgs e)

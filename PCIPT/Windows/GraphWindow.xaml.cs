@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Policy;
@@ -365,27 +366,35 @@ namespace PCIPT.Windows
             };
 
             StackPanel stack = new();
-            stack.Background = Brushes.LightGray;
+            stack.Background = Brushes.White;
             stack.Margin = new Thickness(3 * Size);
 
-            stack.Children.Add(new TextBlock()
+            if (Name != "")
             {
-                TextAlignment = TextAlignment.Center,
-                Padding = new Thickness(5 * Size),
-                Margin = new Thickness(0, 0, 0, 1 * Size),
-                FontSize = 16 * Size,
-                Background = Brushes.White,
-                Text = Name,
-            });
+                stack.Children.Add(new TextBlock()
+                {
+                    TextAlignment = TextAlignment.Center,
+                    Padding = new Thickness(5 * Size),
+                    Margin = new Thickness(0, 0, 0, 1 * Size),
+                    FontSize = 16 * Size,
+                    Background = Brushes.White,
+                    Text = Name.Replace('/', '\n'),
+                });
 
-            stack.Children.Add(new TextBlock()
+                stack.Children.Add(new TextBlock()
+                {
+                    TextAlignment = TextAlignment.Center,
+                    Padding = new Thickness(3 * Size),
+                    FontSize = 12 * Size,
+                    Background = Brushes.White,
+                    Text = "ID: " + Id.ToString(),
+                });
+            }
+            else
             {
-                TextAlignment = TextAlignment.Center,
-                Padding = new Thickness(3 * Size),
-                FontSize = 12 * Size,
-                Background = Brushes.White,
-                Text = "ID: " + Id.ToString(),
-            });
+                stack.Width = 20 * Size;
+                stack.Height = 20 * Size;
+            }
 
             node.Children.Add(stack);
 
@@ -497,6 +506,11 @@ namespace PCIPT.Windows
 
         private void StartSimulation()
         {
+            if (File.Exists("LOG.TXT"))
+            {
+                File.Delete("LOG.TXT");
+            }
+
             simulationThread = new(delegate ()
             {
                 Stopwatch stopwatch = new();
@@ -701,8 +715,15 @@ namespace PCIPT.Windows
 
         private void UpdateColorsButton_Click(object sender, RoutedEventArgs e)
         {
+            double width = GraphCanvas.ActualWidth;
+            double height = GraphCanvas.ActualHeight;
+
+            double sizeShiftX = width * CurrentSize / 2 - width / 2;
+            double sizeShiftY = height * CurrentSize / 2 - height / 2;
+
             AllVehicleNodesObjectCreator.ClearAllColors();
-            Rerender();
+            RenderVehicles(CurrentSize);
+            ShiftOnlyVehicles(new NegSize(TotalShiftWidth - sizeShiftX, TotalShiftHeight - sizeShiftY));
         }
 
         private void SpeedButton_Click(object sender, RoutedEventArgs e)

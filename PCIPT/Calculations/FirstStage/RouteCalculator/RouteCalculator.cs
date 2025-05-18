@@ -18,6 +18,9 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
                          //routeDtos.Find(r => r.SourceId == endPointId && r.DestinationId == startPointId)?.Distance ??
                          float.PositiveInfinity;
 
+            if (startPointId == endPointId)
+                return 0;
+
             if (dist != float.PositiveInfinity) 
                 return dist;
             
@@ -54,7 +57,13 @@ namespace PCIPT.Calculations.FirstStage.RouteFinder
 
         public static void InitRoutes(List<RouteDto> routes, List<NodeDto> nodes)
         {
-            routeDtos = routes.ToList();
+            routeDtos = new();
+            int id = 0;
+            foreach (var route in routes)
+            {
+                routeDtos.Add(new(id++, route.SourceId, route.DestinationId, route.Distance));
+                routeDtos.Add(new(id++, route.DestinationId, route.SourceId, route.Distance));
+            }
             nodeDtos = nodes.ToList();
             savedRoutes = new();
         }
