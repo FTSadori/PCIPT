@@ -59,6 +59,7 @@ namespace PCIPT.Windows
 
         public void ShowTable(int id)
         {
+            ErrorText.Text = "";
             TableMenuButton_Click(new object(), new());
             currentId = id;
             CurrentTableText.Text = $"Current: {tableNames[id]}";
@@ -188,7 +189,7 @@ namespace PCIPT.Windows
             PlanText.Text += $"- Витрати на оливи: {(totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
             PlanText.Text += $"  Загалом: {(totalLine.BaseElectricityConsumption + totalLine.FuelConsumption + totalLine.RepairCosts + totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
 
-            PlanText.Text += "\nЩоденний план перевезень:\n";
+            PlanText.Text += "\nЩозмінний план перевезень:\n";
             var spareList = distributedTasks.ToList();
             spareList.Sort((a, b) => $"{a.Name}[{a.Number}]".CompareTo($"{b.Name}[{b.Number}]"));
             string lastVehicle = "";

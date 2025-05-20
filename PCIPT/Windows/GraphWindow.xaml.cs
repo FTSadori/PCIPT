@@ -77,7 +77,6 @@ namespace PCIPT.Windows
 
         private void ClearDataButton_Click(object sender, RoutedEventArgs e)
         {
-
             MessageBoxResult result = System.Windows.MessageBox.Show(
                 "Do you want to clear data?",
                 "Confirmation",
@@ -87,6 +86,10 @@ namespace PCIPT.Windows
 
             if (result == MessageBoxResult.Yes)
             {
+                GUISize = 1;
+                GUIPercentLabel.Text = $"{(int)(GUISize * 100)}%";
+                Rerender();
+
                 AbleOptionButtons(false);
 
                 TasksDataGrid.ItemsSource = null;
