@@ -255,9 +255,124 @@
             </Border>
             <Border Grid.Row="2" CornerRadius="0 0 5 5" Background="White" Padding="5">
                 <StackPanel Orientation="Vertical" Visibility="Visible" Margin="0 0 0 20" Name="ControlStack">
-                    <Button Name="ReroutingButton" BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Re-routing</Button>
+                    <Button Name="ReroutingButton" BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Click="ReroutingButton_Click">Re-routing</Button>
                 </StackPanel>
             </Border>
+        </Grid>
+
+        <Grid Background="#33000000" Grid.ColumnSpan="4" Grid.RowSpan="2" Visibility="Collapsed" Name="ReroutingGrid">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Name="CreateNewAccountGrid">
+                <Border CornerRadius="20 20 0 0" Height="40" Background="{DynamicResource RoundedTextBoxGrad}" ClipToBounds="True">
+                    <Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{DynamicResource PrettyText}" FontSize="22" Foreground="White">Re-routing</TextBlock>
+                        </StackPanel>
+                        <Button HorizontalAlignment="Right" BorderThickness="0" FontSize="24" Height="20" Padding="-10" Style="{DynamicResource RegButton}" Name="CloseReroutingGrid" Click="CloseReroutingGrid_Click" Background="White" Foreground="{StaticResource PrettyBlueGradient}" Width="20" Margin="0 0 14 0">×</Button>
+                    </Grid>
+                </Border>
+                <Border CornerRadius="0 0 5 5" Background="White" Padding="15 15 15 0">
+                    <StackPanel Orientation="Vertical" Visibility="Visible">
+                        <StackPanel Orientation="Horizontal">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Width="250" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">Model</TextBlock>
+                                <ComboBox Name="ModelComboBox" Height="34" FontFamily="Century Gothic" Margin="10 3 10 10" FontSize="18" Foreground="{StaticResource PrettyBlueGradient}" Width="250" Style="{DynamicResource PrettyComboBox}" BorderBrush="{DynamicResource RoundedTextBoxGrad}" BorderThickness="3">
+                                    <ComboBox.Background>
+                                        <LinearGradientBrush EndPoint="0,1">
+                                            <GradientStop Color="#FFF0F0F0"/>
+                                            <GradientStop Color="#00E5E5E5" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </ComboBox.Background>
+                                    <ComboBoxItem FontSize="16">Dispatcher</ComboBoxItem>
+                                    <ComboBoxItem FontSize="16">Planner</ComboBoxItem>
+                                    <ComboBoxItem FontSize="16">Full access</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Width="50" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">№</TextBlock>
+                                <Border Style="{DynamicResource PrettyBorder}" Width="50" Margin="10 3 10 10">
+                                    <TextBox Height="25" Name="NumberTextBox"></TextBox>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Width="50" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left"></TextBlock>
+                                <Button Style="{DynamicResource RegButton}" Name="VehicleSearchButton" Click="VehicleSearchButton_Click" BorderThickness="0" Height="34" Width="34" FontSize="16" Margin="0 3 5 0">🔎︎</Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <DataGrid Name="FoundVehicleTable" Margin="10 5 10 0" Height="62" Width="370"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="{DynamicResource RoundedTextBoxGrad}"
+                              BorderThickness="3"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+                        
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 10 0 0">
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Width="320" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left">New cargo turnover</TextBlock>
+                                <ComboBox Name="CargoTurnoverComboBox" Height="34" FontFamily="Century Gothic" Margin="10 3 10 10" FontSize="18" Foreground="{StaticResource PrettyBlueGradient}" Width="320" Style="{DynamicResource PrettyComboBox}" BorderBrush="{DynamicResource RoundedTextBoxGrad}" BorderThickness="3">
+                                    <ComboBox.Background>
+                                        <LinearGradientBrush EndPoint="0,1">
+                                            <GradientStop Color="#FFF0F0F0"/>
+                                            <GradientStop Color="#00E5E5E5" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </ComboBox.Background>
+                                    <ComboBoxItem FontSize="16">Dispatcher</ComboBoxItem>
+                                    <ComboBoxItem FontSize="16">Planner</ComboBoxItem>
+                                    <ComboBoxItem FontSize="16">Full access</ComboBoxItem>
+                                </ComboBox>
+                            </StackPanel>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Width="50" Style="{DynamicResource SmallPrettyText}" TextAlignment="Left"></TextBlock>
+                                <Button Style="{DynamicResource RegButton}" Name="PointSearchButton" Click="PointSearchButton_Click" BorderThickness="0" Height="34" Width="34" FontSize="16" Margin="0 3 5 0">🔎︎</Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!--
+                        <TextBlock Width="370" Style="{DynamicResource SmallPrettyText}" Margin="0 0 0 0" TextAlignment="Left">Route</TextBlock>
+                        <Border Style="{DynamicResource PrettyBorder}" Width="370" Margin="10 3 10 10">
+                            <TextBox Height="26" Name="GeneratedRouteTextBox"></TextBox>
+                        </Border>
+                        -->                        
+
+                        <DataGrid Name="FoundPointsTable" Margin="10 5 10 0" Height="62" Width="370"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="{DynamicResource RoundedTextBoxGrad}"
+                              BorderThickness="3"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 15 0 10">
+                            <Button BorderThickness="0" FontSize="18" Height="30" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="100" Name="SubmitReroutingButton" Click="SubmitReroutingButton_Click">Submit</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </Grid>
 
         <!--

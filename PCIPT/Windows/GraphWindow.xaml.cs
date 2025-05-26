@@ -787,5 +787,125 @@ namespace PCIPT.Windows
             ViewLabel.Text = "Distributed tasks";
             TasksTableGrid.Visibility = Visibility.Visible;
         }
+
+        private void CloseReroutingGrid_Click(object sender, RoutedEventArgs e)
+        {
+            ReroutingGrid.Visibility = Visibility.Hidden;
+        }
+
+        private void SubmitReroutingButton_Click(object sender, RoutedEventArgs e)
+        {
+            simulationController.AddNewReroutingTask(currentReroutingMachineName, currentReroutingMachineId, currentReroutingPointId);
+            ReroutingGrid.Visibility = Visibility.Hidden;
+        }
+
+        ObservableCollection<ObservableVehicleObject> foundVehicleList = new();
+        ObservableCollection<ObservablePointObject> foundPointList = new();
+
+        private void VehicleSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            int num = 0;
+            if (!int.TryParse(NumberTextBox.Text, out num))
+            {
+                return;
+            }
+            currentReroutingMachineId = num;
+
+            if (ModelComboBox.SelectedIndex == -1)
+            {
+                return;
+            }
+            currentReroutingMachineName = ModelComboBox.Text;
+
+            var enter = ToObservableListTranslator.ObservableVehicles.ToList().Find(v => v.Name == ModelComboBox.Text && v.Number == num);
+            if (enter == null)
+            {
+                return;
+            }
+
+            foundVehicleList.Clear();
+            foundVehicleList.Add(enter);
+
+            FoundVehicleTable.ItemsSource = new List<VehicleObject>();
+            FoundVehicleTable.ItemsSource = foundVehicleList;
+
+            var points = new List<CargoTurnoverPointDto>();
+            points = CargoPoints.Where(p => VehicleTypes.Find(vt => vt.VehicleType == Vehicles.Find(v => v.Name == enter.Name).Type && vt.CargoType == Cargoes.Find(c => c.Code == p.CargoCode).Type) != null).ToList();
+            CargoTurnoverComboBox.Items.Clear();
+            ComboBoxItem baseItem = new()
+            {
+                FontSize = 16,
+                Content = "-1. Stop"
+            };
+            CargoTurnoverComboBox.Items.Add(baseItem);
+
+
+            foreach (var p in points)
+            {
+                var source = Nodes.Find(n => n.Id == p.SourceId);
+                var dest = Nodes.Find(n => n.Id == p.DestinationId);
+                var cargo = Cargoes.Find(n => n.Code == p.CargoCode);
+
+                var p2 = ToObservablePointsListTranslator.ObservablePoints.ToList().Find(po => po.Id == p.Id);
+                if (p2.FractionLeft <= 0.001) continue;
+
+                ComboBoxItem comboBoxItem = new()
+                {
+                    FontSize = 16,
+                    Content = $"{p.Id}. {source.Name}->{dest.Name} ({cargo.Name})"
+                };
+                CargoTurnoverComboBox.Items.Add(comboBoxItem);
+            }
+        }
+
+        private void ReroutingButton_Click(object sender, RoutedEventArgs e)
+        {
+            ReroutingGrid.Visibility = Visibility.Visible;
+            ModelComboBox.Items.Clear();
+            foreach (var v in Vehicles)
+            {
+                ComboBoxItem comboBoxItem = new()
+                {
+                    FontSize = 16,
+                    Content = v.Name
+                };
+                ModelComboBox.Items.Add(comboBoxItem);
+            }
+            CargoTurnoverComboBox.Items.Clear();
+        }
+
+        int currentReroutingPointId;
+        int currentReroutingMachineId;
+        string currentReroutingMachineName;
+
+        private void PointSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CargoTurnoverComboBox.SelectedIndex == -1)
+            {
+                return;
+            }
+
+            int id = 0;
+            if (!int.TryParse(CargoTurnoverComboBox.Text.Split(".")[0], out id))
+            {
+                return;
+            }
+            currentReroutingPointId = id;
+
+            if (id != -1)
+            {
+                var enter = ToObservablePointsListTranslator.ObservablePoints.ToList().Find(po => po.Id == id);
+                if (enter == null)
+                {
+                    return;
+                }
+
+                foundPointList.Clear();
+                foundPointList.Add(enter);
+
+                FoundPointsTable.ItemsSource = new List<VehicleObject>();
+                FoundPointsTable.ItemsSource = foundPointList;
+            }
+        }
     }
 }

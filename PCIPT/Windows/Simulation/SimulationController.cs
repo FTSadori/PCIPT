@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.IO;
 using PCIPT.Windows.Simulation.Observables;
 using System.Windows.Controls;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace PCIPT.Windows.Simulation
 {
@@ -23,11 +24,12 @@ namespace PCIPT.Windows.Simulation
         static Random random = new();
 
         private List<VehicleByRoutesRow> plan;
+        private List<ReroutingTask> pendingReroutingTasks = new();
 
         private List<VehicleTypeDto> vehicleTypes;
 
-        private List<VehicleObject> vehicleObjects = new();
-        private List<PointObject> pointObjects = new();
+        public List<VehicleObject> vehicleObjects = new();
+        public List<PointObject> pointObjects = new();
 
         private Dictionary<int, NegSize> nodesCoords;
 
@@ -74,6 +76,11 @@ namespace PCIPT.Windows.Simulation
             this.logFilePath = logFilePath;
         }
 
+        public void AddNewReroutingTask(string machineName, int machineNumber, int pointId)
+        {
+            pendingReroutingTasks.Add(new ReroutingTask(machineName, machineNumber, pointId));
+        }
+
         public void NextStep(double deltaSeconds, double effectiveTime)
         {
             StreamWriter sw = new(logFilePath, true);
@@ -114,9 +121,22 @@ namespace PCIPT.Windows.Simulation
                     time = Unloads(vehicle, sw, time);
                     break;
                 case VehicleState.OVER:
-                    return;
+                    time = Over(vehicle, sw, time);
+                    break;
+                    
             }
             StepForVehicle(sw, vehicle, time, deltaSeconds);
+        }
+
+        public double Over(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        {
+            var reroutingTask = pendingReroutingTasks.Find(r => r.machine == vehicle.name && r.number == vehicle.number);
+            if (reroutingTask != null)
+            {
+                ChangeState(vehicle, sw, VehicleState.AWAITS);
+                return deltaSeconds;
+            }
+            return 0;
         }
 
         public void ChangeState(VehicleObject vehicle, StreamWriter sw, VehicleState state)
@@ -188,6 +208,13 @@ namespace PCIPT.Windows.Simulation
         {
             if (vehicle.loadTimeRemaining < 0)
             {
+                var reroutingTask = pendingReroutingTasks.Find(r => r.machine == vehicle.name && r.number == vehicle.number);
+                if (reroutingTask != null)
+                {
+                    ChangeState(vehicle, sw, VehicleState.AWAITS);
+                    return deltaSeconds;
+                }
+
                 var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
 
                 performance.unloadTimes += 1;
@@ -299,6 +326,19 @@ namespace PCIPT.Windows.Simulation
         public double Awaits(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
             var pointsForVehicle = plan.Where(p => p.Name == vehicle.name && p.Number == vehicle.number).ToList();
+
+            var reroutingTask = pendingReroutingTasks.Find(r => r.machine == vehicle.name && r.number == vehicle.number);
+            if (reroutingTask != null)
+            {
+                pendingReroutingTasks.Remove(reroutingTask);
+                if (reroutingTask.pointId == -1)
+                {
+                    ChangeState(vehicle, sw, VehicleState.OVER);
+                    return 0;
+                }
+                pointsForVehicle.Insert(0, new VehicleByRoutesRow("", 0, reroutingTask.pointId, 0, 0, 0, 0, 0, 0));
+            }
+
             if (pointsForVehicle.Count == 0)
             {
                 return 0;
