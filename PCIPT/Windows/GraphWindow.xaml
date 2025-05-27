@@ -60,6 +60,89 @@
                         </DataGrid>
                     </Grid>
 
+                    <Grid Visibility="Hidden" Name="AssessGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Margin="5 25 0 0" Style="{DynamicResource LeftText}" Grid.Column="0">
+                            Vehicles
+                        </TextBlock>
+
+                        <TextBlock Margin="5 25 0 0" Style="{DynamicResource LeftText}" Grid.Column="1">
+                            Cargo flows
+                        </TextBlock>
+
+                        <TextBlock Margin="5 25 0 0" Style="{DynamicResource LeftText}" Grid.Column="2">
+                            Cargoes
+                        </TextBlock>
+
+                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="0" BorderThickness="0" Name="ExportAssess1Button" Click="ExportAssess1Button_Click" Margin="0 5 0 0">Export</Button>
+                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="1" BorderThickness="0" Name="ExportAssess2Button" Click="ExportAssess2Button_Click" Margin="0 5 0 0">Export</Button>
+                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="2" BorderThickness="0" Name="ExportAssess3Button" Click="ExportAssess3Button_Click" Margin="0 5 0 0">Export</Button>
+                        
+                        <DataGrid Name="AsessVehiclesDataGrid" Margin="5 5 5 0" Grid.Row="1"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="{DynamicResource RoundedTextBoxGrad}"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+
+                        <DataGrid Name="AsessPointsDataGrid" Grid.Column="1" Margin="5 5 5 0" Grid.Row="1"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="{DynamicResource RoundedTextBoxGrad}"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+
+                        <DataGrid Name="AsessCargoesDataGrid" Grid.Column="2" Margin="5 5 0 0" Grid.Row="1"
+                                  AutoGenerateColumns="True"
+                                  CanUserSortColumns="True"
+                                  CanUserResizeColumns="True"
+                                  IsReadOnly="True"
+                                  HeadersVisibility="All"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Background="Transparent"
+                              RowBackground="#4C00025C"
+                              AlternatingRowBackground="White"
+                              BorderBrush="{DynamicResource RoundedTextBoxGrad}"
+                              HorizontalGridLinesBrush="#FF030323"
+                              VerticalGridLinesBrush="#FF030323"
+                              Foreground="#FF030323"
+                              FontFamily="Century Gothic"
+                              >
+                        </DataGrid>
+                    </Grid>
+
                     <Grid Visibility="Hidden" Name="PointsTableGrid">
                         <DataGrid Name="PointsDataGrid" Margin="0 25 0 0"
                                   AutoGenerateColumns="True"
@@ -162,7 +245,7 @@
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="PointsMenuButton" Click="PointsMenuButton_Click">Points table</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="DistributedTasksButton" Click="DistributedTasksButton_Click">Distributed tasks</Button>
                     <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="OutputMenuButton" Click="OutputMenuButton_Click">Output</Button>
-                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160">Assess</Button>
+                    <Button BorderThickness="0" FontSize="14" Height="24" Style="{DynamicResource RegButton}" Background="{DynamicResource RoundedTextBoxGrad}" Width="160" Name="AssessMenuButton" Click="AssessMenuButton_Click">Assess</Button>
                 </StackPanel>
             </Border>
         </Grid>

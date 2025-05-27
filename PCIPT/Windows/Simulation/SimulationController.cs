@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.IO;
 using PCIPT.Windows.Simulation.Observables;
 using System.Windows.Controls;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace PCIPT.Windows.Simulation
 {
@@ -35,8 +34,11 @@ namespace PCIPT.Windows.Simulation
 
         private string logFilePath;
 
+        private List<int> cyclesLeft = new();
         private Performance performance = new();
         private TextBlock output;
+
+        private double totalTime = 0;
 
         public SimulationController(List<VehicleByRoutesRow> plan, List<CargoTurnoverPointDto> pointsDto, List<VehicleTypeDto> vehicleTypes, List<CargoDto> cargoDtos, List<VehicleDto> vehicleDtos, List<GraphVehiclesData> vehiclesCoords, Dictionary<int, NegSize> nodesCoords, Dictionary<string, int> startPoints, List<NegSize> biases, string logFilePath, TextBlock output)
         {
@@ -53,6 +55,11 @@ namespace PCIPT.Windows.Simulation
                 var cargo = cargoDtos.Where(c => c.Code == dto.CargoCode).First();
 
                 pointObjects.Add(new PointObject(dto.Id, dto.OutgoingCargo, dto.OutgoingCargo, dto.OutgoingCargo, sour.Width, sour.Height, dest.Width, dest.Height, cargo.Type, cargo.CapacityUtilisationRate, RouteCalculator.GetDistanceBetween(dto.SourceId, dto.DestinationId), dto.SourceId, dto.DestinationId));
+            }
+
+            foreach (var line in plan)
+            {
+                cyclesLeft.Add((int)line.NumberOfCycles);
             }
 
             int i = 0;
@@ -83,10 +90,14 @@ namespace PCIPT.Windows.Simulation
 
         public void NextStep(double deltaSeconds, double effectiveTime)
         {
+            totalTime += deltaSeconds / 60;
+
             StreamWriter sw = new(logFilePath, true);
+            int id = 0;
             foreach (var vehicle in vehicleObjects)
             {
-                StepForVehicle(sw, vehicle, deltaSeconds * (effectiveTime + random.NextDouble() * (1.0 - effectiveTime)), deltaSeconds);
+                StepForVehicle(id, sw, vehicle, deltaSeconds * (effectiveTime + random.NextDouble() * (1.0 - effectiveTime)), deltaSeconds);
+                id += 1;
             }
             sw.Close();
 
@@ -94,38 +105,44 @@ namespace PCIPT.Windows.Simulation
             ToObservablePointsListTranslator.UpdateList(pointObjects);
         }
 
-        public void StepForVehicle(StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
+        public void StepForVehicle(int id, StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
         {
             if (time <= 0) return;
+            double timeN = 0;
 
             switch (vehicle.vehicleState)
             {
                 case VehicleState.AWAITS:
-                    time = Awaits(vehicle, sw, time);
+                    timeN = Awaits(vehicle, sw, time, id);
+                    ObservableListForVehicleAssessObject.AddTime(id, 0, (float)totalTime);
                     break;
                 case VehicleState.MOVES_WITH_LOAD:
-                    time = MovesWithLoad(vehicle, sw, time);
+                    timeN = MovesWithLoad(vehicle, sw, time);
+                    ObservableListForVehicleAssessObject.AddTime(id, (float)time - (float)timeN, (float)totalTime);
                     break;
                 case VehicleState.MOVES_WITHOUT_LOAD:
-                    time = MovesWithoutLoad(vehicle, sw, time);
+                    timeN = MovesWithoutLoad(vehicle, sw, time);
+                    ObservableListForVehicleAssessObject.AddTime(id, (float)time - (float)timeN, (float)totalTime);
                     break;
                 case VehicleState.MOVES_BACK:
-                    time = MovesBack(vehicle, sw, time);
+                    timeN = MovesBack(vehicle, sw, time);
+                    ObservableListForVehicleAssessObject.AddTime(id, (float)time - (float)timeN, (float)totalTime);
                     break;
                 case VehicleState.LOADS:
-                    performance.accumulatedLoadTime += deltaSeconds;
-                    time = Loads(vehicle, sw, time);
+                    timeN = Loads(vehicle, sw, time);
+                    ObservableListForVehicleAssessObject.AddTime(id, (float)time - (float)timeN, (float)totalTime);
                     break;
                 case VehicleState.UNLOADS:
-                    performance.accumulatedUnloadTime += deltaSeconds;
-                    time = Unloads(vehicle, sw, time);
+                    timeN = Unloads(vehicle, sw, time, id);
+                    ObservableListForVehicleAssessObject.AddTime(id, (float)time - (float)timeN, (float)totalTime);
                     break;
                 case VehicleState.OVER:
-                    time = Over(vehicle, sw, time);
+                    timeN = Over(vehicle, sw, time);
+                    ObservableListForVehicleAssessObject.AddTime(id, 0, (float)totalTime);
                     break;
                     
             }
-            StepForVehicle(sw, vehicle, time, deltaSeconds);
+            StepForVehicle(id, sw, vehicle, timeN, deltaSeconds);
         }
 
         public double Over(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
@@ -204,7 +221,7 @@ namespace PCIPT.Windows.Simulation
             return 0;
         }
 
-        public double Unloads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double Unloads(VehicleObject vehicle, StreamWriter sw, double deltaSeconds, int id)
         {
             if (vehicle.loadTimeRemaining < 0)
             {
@@ -217,8 +234,12 @@ namespace PCIPT.Windows.Simulation
 
                 var po = pointObjects.Where(po => po.pointId == vehicle.lastPointId).First();
 
-                performance.unloadTimes += 1;
-                if (po.cargoLeft > 0)
+                ObservableListForVehicleAssessObject.AddCargo(id, (float)vehicle.load);
+                if (vehicle.planLineId != -1)
+                {
+                    cyclesLeft[vehicle.planLineId] -= 1;
+                }
+                if (po.cargoLeft > 0 && (vehicle.planLineId == -1 || cyclesLeft[vehicle.planLineId] != 0))
                 {
                     // get ahead of time
                     po.cargoLeft = Math.Max(-0.01, po.cargoLeft - vehicle.maxLoad * po.utilizationRate);
@@ -241,6 +262,7 @@ namespace PCIPT.Windows.Simulation
                     return deltaSeconds;
                 }
 
+                ObservableListForVehicleAssessObject.DoneRequest(id, 1);
                 ChangeState(vehicle, sw, VehicleState.AWAITS);
                 return deltaSeconds;
             }
@@ -271,13 +293,15 @@ namespace PCIPT.Windows.Simulation
                     AddToLog(sw,$"=============================================================");
                     return 0;
                 }
+                double newload = Math.Min(po.actualCargoLeft, vehicle.maxLoad * po.utilizationRate);
+
                 po.actualCargoLeft = Math.Max(0, po.actualCargoLeft - vehicle.maxLoad * po.utilizationRate);
 
                 vehicle.path = path.Nodes;
                 vehicle.pathIterator = 0;
                 vehicle.lPassed = 0;
                 ChangeState(vehicle, sw, VehicleState.MOVES_WITH_LOAD);
-                vehicle.load = vehicle.maxLoad * po.utilizationRate;
+                vehicle.load = newload;
                 return deltaSeconds;
             }
             else
@@ -323,7 +347,7 @@ namespace PCIPT.Windows.Simulation
             return 0;
         }
 
-        public double Awaits(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
+        public double Awaits(VehicleObject vehicle, StreamWriter sw, double deltaSeconds, int id)
         {
             var pointsForVehicle = plan.Where(p => p.Name == vehicle.name && p.Number == vehicle.number).ToList();
 
@@ -336,7 +360,8 @@ namespace PCIPT.Windows.Simulation
                     ChangeState(vehicle, sw, VehicleState.OVER);
                     return 0;
                 }
-                pointsForVehicle.Insert(0, new VehicleByRoutesRow("", 0, reroutingTask.pointId, 0, 0, 0, 0, 0, 0));
+                pointsForVehicle.Insert(0, new VehicleByRoutesRow("", 0, reroutingTask.pointId, 0, 0, 0, 0, -1, 0));
+                ObservableListForVehicleAssessObject.AddRequest(id, 1);
             }
 
             if (pointsForVehicle.Count == 0)
@@ -346,12 +371,19 @@ namespace PCIPT.Windows.Simulation
 
             foreach (var point in pointsForVehicle)
             {
+                int pointId = plan.IndexOf(point);
+
                 var po = pointObjects.Where(po => po.pointId == point.PointId).First();
-                if (po.cargoLeft > 0)
+                if (po.cargoLeft > 0 && (pointId == -1 || cyclesLeft[pointId] != 0))
                 {
                     // get ahead of time
                     po.cargoLeft = Math.Max(-0.001, po.cargoLeft - vehicle.maxLoad * po.utilizationRate);
                     //
+
+                    if (point.NumberOfCycles != -1)
+                        vehicle.planLineId = plan.IndexOf(point);
+                    else
+                        vehicle.planLineId = -1;
 
                     if (vehicle.lastNodeId == po.fromId)
                     {

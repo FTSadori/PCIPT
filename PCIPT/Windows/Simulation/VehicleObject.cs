@@ -40,6 +40,7 @@ namespace PCIPT.Windows.Simulation
         public double loadTimeRemaining;
         public int startId = -1;
         public bool dislocated = true;
+        public int planLineId = 0;
 
         public VehicleObject(int number, string name, double maxLoad, double loadTime, double speedWithCargo, double speedWithoutCargo, string vehicleType, int startId, int lastNodeId, NegSize bias)
         {

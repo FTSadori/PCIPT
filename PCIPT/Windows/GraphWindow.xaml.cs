@@ -650,6 +650,7 @@ namespace PCIPT.Windows
 
             ToObservableListTranslator.ObservableVehicles = new();
             ToObservablePointsListTranslator.ObservablePoints = new();
+            ObservableListForVehicleAssessObject.ObservableVehicleAssesses = new();
             VehiclesDataGrid.ItemsSource = ToObservableListTranslator.ObservableVehicles;
             PointsDataGrid.ItemsSource = ToObservablePointsListTranslator.ObservablePoints;
             ToObservablePointsListTranslator.nodeDtos = Nodes;
@@ -658,6 +659,8 @@ namespace PCIPT.Windows
 
             RouteCalculator.InitRoutes(Routes, Nodes);
             simulationController = new(DistributedTasksShort, CargoPoints, VehicleTypes, Cargoes, Vehicles, vehiclesCoords, nodesCoords, starts, biases, "LOG.TXT", OutputText);
+            ObservableListForVehicleAssessObject.Init(simulationController.vehicleObjects, DistributedTasksShort, simulationController.pointObjects);
+            AsessVehiclesDataGrid.ItemsSource = ObservableListForVehicleAssessObject.ObservableVehicleAssesses;
             StartSimulation();
             SetTimeSpent(0);
 
@@ -749,6 +752,7 @@ namespace PCIPT.Windows
             PointsTableGrid.Visibility = Visibility.Hidden;
             OutputGrid.Visibility = Visibility.Hidden;
             TasksTableGrid.Visibility = Visibility.Hidden;
+            AssessGrid.Visibility = Visibility.Hidden;
         }
 
         private void GraphMenuButton_Click(object sender, RoutedEventArgs e)
@@ -906,6 +910,28 @@ namespace PCIPT.Windows
                 FoundPointsTable.ItemsSource = new List<VehicleObject>();
                 FoundPointsTable.ItemsSource = foundPointList;
             }
+        }
+
+        private void ExportAssess1Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ExportAssess2Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ExportAssess3Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void AssessMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            CloseAllMenus();
+            ViewLabel.Text = "Assess";
+            AssessGrid.Visibility = Visibility.Visible;
         }
     }
 }
