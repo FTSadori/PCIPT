@@ -651,8 +651,12 @@ namespace PCIPT.Windows
             ToObservableListTranslator.ObservableVehicles = new();
             ToObservablePointsListTranslator.ObservablePoints = new();
             ObservableListForVehicleAssessObject.ObservableVehicleAssesses = new();
+            ObservableListForFlowAssessObjects.ObservableFlows = new();
+            ObservableListForCargoAssessObjects.ObservableCargoes = new();
             VehiclesDataGrid.ItemsSource = ToObservableListTranslator.ObservableVehicles;
             PointsDataGrid.ItemsSource = ToObservablePointsListTranslator.ObservablePoints;
+            AsessPointsDataGrid.ItemsSource = ObservableListForFlowAssessObjects.ObservableFlows;
+            AsessCargoesDataGrid.ItemsSource = ObservableListForCargoAssessObjects.ObservableCargoes;
             ToObservablePointsListTranslator.nodeDtos = Nodes;
             ToObservablePointsListTranslator.cargoDtos = Cargoes;
             ToObservablePointsListTranslator.cargoTurnoverPointDtos = CargoPoints;
@@ -670,7 +674,13 @@ namespace PCIPT.Windows
         private void SetTimeSpent(double time)
         {
             timeSpent = time;
-            TimePassedLabel.Text = $"{(int)(time / 3600)}h {(int)(time / 60 % 60)}m {(int)(time % 60)}s ({time / dailyTimeFund / 60 * 100:0.00}%)";
+            double timePersent = time / dailyTimeFund / 60 * 100;
+            TimePassedLabel.Text = $"{(int)(time / 3600)}h {(int)(time / 60 % 60)}m {(int)(time % 60)}s ({timePersent:0.00}%)";
+
+            if (timePersent >= 100.0)
+            {
+                PauseButton_Click(new(), new());
+            }
         }
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
@@ -914,17 +924,23 @@ namespace PCIPT.Windows
 
         private void ExportAssess1Button_Click(object sender, RoutedEventArgs e)
         {
-
+            string selectedPath = PlannerWindow.SelectPathToExport();
+            if (selectedPath == "") return;
+            CsvHandler.PutAllToFile(selectedPath + "\\AssessVehiclesTable.csv", ObservableListForVehicleAssessObject.ObservableVehicleAssesses);
         }
 
         private void ExportAssess2Button_Click(object sender, RoutedEventArgs e)
         {
-
+            string selectedPath = PlannerWindow.SelectPathToExport();
+            if (selectedPath == "") return;
+            CsvHandler.PutAllToFile(selectedPath + "\\AssessFlowsTable.csv", ObservableListForFlowAssessObjects.ObservableFlows);
         }
 
         private void ExportAssess3Button_Click(object sender, RoutedEventArgs e)
         {
-
+            string selectedPath = PlannerWindow.SelectPathToExport();
+            if (selectedPath == "") return;
+            CsvHandler.PutAllToFile(selectedPath + "\\AssessCargoesTable.csv", ObservableListForCargoAssessObjects.ObservableCargoes);
         }
 
         private void AssessMenuButton_Click(object sender, RoutedEventArgs e)

@@ -152,7 +152,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                         if (Tvehicle <= 0) continue;
                         int cycles = (int)MathF.Ceiling(Tvehicle / row.RoutePerformance);
                         Tcompleted += cycles * row.RoutePerformance;
-                        Tmore += cycles * row.RoutePerformance - Tvehicle;
+                        Tmore = MathF.Min(0, cycles * row.RoutePerformance - Tvehicle);
                         BusyVehicles[pair.Key][i].UsedTime += cycles * row.TransportCycleSize;
                         BusyVehicles[pair.Key][i].IdPointCurrent = vrstat.Key.DestinationId;
 
@@ -165,7 +165,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
 
                 foreach (var pair in BusyVehicles)
                 {
-                    pair.Value.RemoveAll(m => m.UsedTime < 0.1);
+                    pair.Value.RemoveAll(m => m.UsedTime < 0.001);
                 }
 
             }

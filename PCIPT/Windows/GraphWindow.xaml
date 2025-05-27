@@ -84,9 +84,9 @@
                             Cargoes
                         </TextBlock>
 
-                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="0" BorderThickness="0" Name="ExportAssess1Button" Click="ExportAssess1Button_Click" Margin="0 5 0 0">Export</Button>
-                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="1" BorderThickness="0" Name="ExportAssess2Button" Click="ExportAssess2Button_Click" Margin="0 5 0 0">Export</Button>
-                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="2" BorderThickness="0" Name="ExportAssess3Button" Click="ExportAssess3Button_Click" Margin="0 5 0 0">Export</Button>
+                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="0" BorderThickness="0" Name="ExportAssess1Button" Click="ExportAssess1Button_Click" Margin="5 5 5 0">Export</Button>
+                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="1" BorderThickness="0" Name="ExportAssess2Button" Click="ExportAssess2Button_Click" Margin="5 5 5 0">Export</Button>
+                        <Button Style="{DynamicResource RegButton}" FontSize="16" Grid.Row="2" Grid.Column="2" BorderThickness="0" Name="ExportAssess3Button" Click="ExportAssess3Button_Click" Margin="5 5 5 0">Export</Button>
                         
                         <DataGrid Name="AsessVehiclesDataGrid" Margin="5 5 5 0" Grid.Row="1"
                                   AutoGenerateColumns="True"

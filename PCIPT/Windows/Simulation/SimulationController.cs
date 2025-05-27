@@ -103,6 +103,8 @@ namespace PCIPT.Windows.Simulation
 
             ToObservableListTranslator.UpdateList(vehicleObjects);
             ToObservablePointsListTranslator.UpdateList(pointObjects);
+            ObservableListForFlowAssessObjects.UpdateList(pointObjects);
+            ObservableListForCargoAssessObjects.UpdateList(pointObjects);
         }
 
         public void StepForVehicle(int id, StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
@@ -164,6 +166,7 @@ namespace PCIPT.Windows.Simulation
 
         public double MovesBack(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
+            vehicle.load = 0;
             int sourceId = vehicle.path[vehicle.pathIterator];
             int destinationId = vehicle.path[vehicle.pathIterator + 1];
             double dist = RouteCalculator.GetDistanceBetween(sourceId, destinationId);
@@ -193,6 +196,7 @@ namespace PCIPT.Windows.Simulation
 
         public double MovesWithoutLoad(VehicleObject vehicle, StreamWriter sw, double deltaSeconds)
         {
+            vehicle.load = 0;
             int sourceId = vehicle.path[vehicle.pathIterator];
             int destinationId = vehicle.path[vehicle.pathIterator + 1];
             double dist = RouteCalculator.GetDistanceBetween(sourceId, destinationId);

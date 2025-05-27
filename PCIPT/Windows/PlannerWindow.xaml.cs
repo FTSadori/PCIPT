@@ -409,7 +409,7 @@ namespace PCIPT.Windows
             Export(currentId, selectedPath);
         }
 
-        private string SelectPathToExport()
+        public static string SelectPathToExport()
         {
             string selectedPath = "";
 

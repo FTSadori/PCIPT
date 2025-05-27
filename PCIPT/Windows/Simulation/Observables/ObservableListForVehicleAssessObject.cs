@@ -35,7 +35,7 @@ namespace PCIPT.Windows.Simulation.Observables
                 {
                     float ur = (float)pointObjects.Find(point => point.pointId == line.PointId).utilizationRate;
                     float c = (float)vehicleObjects.Find(vo => vo.name == vehicleObject.name && vo.number == vehicleObject.number).maxLoad;
-                    allCargoPlan[^1] += line.NumberOfCycles * ur * c;
+                    allCargoPlan[^1] += (line.NumberOfCycles - 1) * ur * c + 0.0001f;
                 }
             }
         }
@@ -61,7 +61,7 @@ namespace PCIPT.Windows.Simulation.Observables
         public static void AddCargo(int id, float cargo)
         {
             ObservableVehicleAssesses[id].TotalCargoTransported += cargo;
-            ObservableVehicleAssesses[id].WorkDonePersentage = (allCargoPlan[id] == 0) ? 100 : MathF.Round(ObservableVehicleAssesses[id].TotalCargoTransported / allCargoPlan[id] * 100, 2);
+            ObservableVehicleAssesses[id].WorkDonePersentage = (allCargoPlan[id] == 0) ? 100 : MathF.Min(100f, MathF.Round(ObservableVehicleAssesses[id].TotalCargoTransported / allCargoPlan[id] * 100, 2));
         }
     }
 }
