@@ -99,7 +99,7 @@ namespace PCIPT.Windows.DataHandlers
 
             foreach (DataRow row in dataSet.Tables[0].Rows)
             {
-                list.Add(new CargoTurnoverPointDto((int)row["id"], (int)row["sourceid"], (int)row["destinationid"], (float)row["outgoingcargo"], (int)row["cargocode"]));
+                list.Add(new CargoTurnoverPointDto((int)row["id"], (int)row["sourceid"], (int)row["destinationid"], (float)row["outgoingcargo"], (int)row["cargocode"], (float)row["deliverytime"]));
             }
 
             return list;

@@ -318,7 +318,7 @@ namespace PCIPT.Windows
                 }
 
                 errorMessage = "Distributing tasks by vehicles";
-                distributedTasks = VehiclesByRoutesCalculator.DistributeTasksByVehicles(vehiclesByRoutes, PlannerImportWindow.vehicleDtos, PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.timeFund * PlannerImportWindow.timeUsageFraction, PlannerImportWindow.workingDays * PlannerImportWindow.workShifts);
+                distributedTasks = VehiclesByRoutesCalculator.DistributeTasksByVehicles(vehiclesByRoutes, PlannerImportWindow.vehicleDtos, PlannerImportWindow.cargoTurnoverPointDtos, PlannerImportWindow.routeDtos, PlannerImportWindow.timeFund, PlannerImportWindow.timeUsageFraction, PlannerImportWindow.workingDays * PlannerImportWindow.workShifts);
 
                 errorMessage = "Calculating final cost";
                 finalCost = FinalCostCalculator.CalculateFinalCost(distributedTasks, PlannerImportWindow.fuelVehicleDtos, PlannerImportWindow.electricVehicleDtos, PlannerImportWindow.timeFund * PlannerImportWindow.timeUsageFraction);
@@ -327,7 +327,7 @@ namespace PCIPT.Windows
                 dailyCargoTurnoverPoints = new();
                 foreach (var ctp in PlannerImportWindow.cargoTurnoverPointDtos)
                 {
-                    dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(ctp.Id, ctp.SourceId, ctp.DestinationId, ctp.OutgoingCargo / PlannerImportWindow.workingDays / PlannerImportWindow.workShifts, ctp.CargoCode));
+                    dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(ctp.Id, ctp.SourceId, ctp.DestinationId, ctp.OutgoingCargo / PlannerImportWindow.workingDays / PlannerImportWindow.workShifts, ctp.CargoCode, ctp.DeliveryTime));
                 }
             }
             catch (Exception ex)
@@ -387,10 +387,10 @@ namespace PCIPT.Windows
                 case 2: PlannerImportWindow.electricVehicleDtos.Add(new ElectricVehicleDto()); break;
                 case 3: PlannerImportWindow.routeDtos.Add(new RouteDto(0, 0, 0, 0)); break;
                 case 4: PlannerImportWindow.cargoDtos.Add(new CargoDto(0,"","",0)); break;
-                case 5: PlannerImportWindow.cargoTurnoverPointDtos.Add(new CargoTurnoverPointDto(0,0,0,0,0)); break;
+                case 5: PlannerImportWindow.cargoTurnoverPointDtos.Add(new CargoTurnoverPointDto(0,0,0,0,0,0)); break;
                 case 6: PlannerImportWindow.vehicleTypeDtos.Add(new VehicleTypeDto("", "")); break;
                 case 7: PlannerImportWindow.nodeDtos.Add(new NodeDto(0, "")); break;
-                case 8: dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(0, 0, 0, 0, 0)); break;
+                case 8: dailyCargoTurnoverPoints.Add(new CargoTurnoverPointDto(0, 0, 0, 0, 0, 0)); break;
                 case 9: vehicleCosts.Add(new CostTableRowEntity("",0,0,0,0,0,0)); break;
                 case 10: testPaths.Add(new TestPath(0,0,0)); break;
                 case 11: distributedTasks.Add(new VehicleByRoutesRow("",0,0,0,0,0,0,0,0)); break;

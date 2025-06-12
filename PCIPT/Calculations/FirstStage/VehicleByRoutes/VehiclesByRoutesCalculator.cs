@@ -32,6 +32,8 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
             var totalMasses = CargoTurnoverCalculator.GetTotalMassForEachCargo(points);
             float fullMass = totalMasses.Sum(m => m.Value);
 
+            points = points.OrderBy(p => p.DeliveryTime).ToList();
+
             Dictionary<PointFilesData, List<VehicleInRouteStats>> vehicleInRoutes = new();
             foreach (var point in points)
             {
@@ -56,6 +58,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
             List<CargoTurnoverPointDto> points,
             List<RouteDto> routes,
             float dailyTimeFund,
+            float timeUsageFraction,
             int workingDays
             )
         {
@@ -71,7 +74,10 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
 
             foreach (var vrstat in vrstats)
             {
-                float Tneeds = points.Find(p => p.Id == vrstat.Key.Id).OutgoingCargo / workingDays;
+                var thisPoint = points.Find(p => p.Id == vrstat.Key.Id);
+                float realTimeFund = Math.Min(thisPoint.DeliveryTime, dailyTimeFund) * timeUsageFraction;
+
+                float Tneeds = thisPoint.OutgoingCargo / workingDays;
                 float Treal = 0;
 
                 // recalculate pathes
@@ -91,7 +97,8 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                             continue;
 
                         // рахуємо вільний час
-                        float tleft = dailyTimeFund - entry.UsedTime - entry.Trc - entry.Trs;
+                        float tleft = realTimeFund - entry.UsedTime - entry.Trc - entry.Trs;
+                        if (tleft <= 0) continue;
                         // знаходимо цілу кількість циклів
                         int cycles = (int)MathF.Floor(tleft / vrrow.TransportCycleSize);
                         Treal += cycles * vrrow.RoutePerformance;
@@ -109,7 +116,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                         {
                             // current and start are equal
                             BusyVehicles[vrrow.Name].Add(new(0f, vrstat.Key.SourceId, vrstat.Key.SourceId, 0f, 0f));
-                            Treal += vrrow.RoutePerformance * vrrow.NumberOfTransportCyclesPerDay;
+                            Treal += vrrow.RoutePerformance * vrrow.NumberOfTransportCyclesPerDay * realTimeFund / dailyTimeFund;
                         }
                     }
                     if (Treal < Tneeds)
@@ -129,8 +136,9 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                     freeCargoVolume[line.Key] = new();
                     for (int i = 0; i < line.Value.Count; ++i)
                     {
-                        var freeTime = dailyTimeFund - line.Value[i].UsedTime - line.Value[i].Trs - line.Value[i].Trc;
-                        freeCargoVolume[line.Key].Add(MathF.Floor(freeTime / dailyTimeFund * row.NumberOfTransportCyclesPerDay) * row.RoutePerformance);
+                        var freeTime = realTimeFund - line.Value[i].UsedTime - line.Value[i].Trs - line.Value[i].Trc;
+                        if (freeTime <= 0) freeTime = 0;
+                        freeCargoVolume[line.Key].Add(MathF.Floor(freeTime / (dailyTimeFund * timeUsageFraction) * row.NumberOfTransportCyclesPerDay) * row.RoutePerformance);
                         maxFreeCargo = Math.Max(maxFreeCargo, freeCargoVolume[line.Key][i]);
                         sumCargo += freeCargoVolume[line.Key][i];
                     }
@@ -156,7 +164,7 @@ namespace PCIPT.Calculations.FirstStage.DefineRoutes
                         BusyVehicles[pair.Key][i].UsedTime += cycles * row.TransportCycleSize;
                         BusyVehicles[pair.Key][i].IdPointCurrent = vrstat.Key.DestinationId;
 
-                        float fractionUsed = cycles * row.TransportCycleSize / dailyTimeFund;
+                        float fractionUsed = cycles * row.TransportCycleSize / (dailyTimeFund * timeUsageFraction);
                         distributionTable.Add(new VehicleByRoutesRow(pair.Key, i + 1, vrstat.Key.Id, fractionUsed,
                             vrstat.Key.Distance, points.Find(p => p.Id == vrstat.Key.Id)?.CargoCode ?? 0,
                             row.TransportCycleSize, cycles, cycles * row.TransportCycleSize + BusyVehicles[pair.Key][i].Trc));

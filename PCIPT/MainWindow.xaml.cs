@@ -116,7 +116,7 @@ namespace PCIPT
                 CsvHandler.PutAllToFile(vehicleByRoutes.Key.FileName, vehicleByRoutes.Value);
             }
 
-            var distributedTasks = VehiclesByRoutesCalculator.DistributeTasksByVehicles(vehiclesByRoutes, vehicles, points, routes, DAILY_TIME_FUND, WORKING_DAYS);
+            var distributedTasks = VehiclesByRoutesCalculator.DistributeTasksByVehicles(vehiclesByRoutes, vehicles, points, routes, 1, DAILY_TIME_FUND, WORKING_DAYS);
             CsvHandler.PutAllToFile("DistributedTasks.csv", distributedTasks);
 
             var fuelVehicles = CsvHandler.GetAllFromFile<FuelVehicleDto>("FuelVehicles.csv");
