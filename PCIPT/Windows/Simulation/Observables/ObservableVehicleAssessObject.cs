@@ -18,8 +18,10 @@ namespace PCIPT.Windows.Simulation.Observables
         private float totalCargoTransported = 0f;
         private float workDonePersentage = 0f;
         private float requestsDone = 0f;
+        private float requestsDoneInTime = 0f;
         private float requestsTotal = 0f;
         private float requestsDonePersentage = 0f;
+        private float requestsDoneInTimePersentage = 0f;
 
         public int Id
         {
@@ -69,6 +71,18 @@ namespace PCIPT.Windows.Simulation.Observables
             set { requestsDone = value; OnPropertyChanged(nameof(RequestsDone)); }
         }
 
+        public float RequestsDoneInTime
+        {
+            get { return requestsDoneInTime; }
+            set { requestsDoneInTime = value; OnPropertyChanged(nameof(RequestsDoneInTime)); }
+        }
+
+        public float TotalDelay
+        {
+            get { return totalDelay; }
+            set { totalDelay = value; OnPropertyChanged(nameof(TotalDelay)); }
+        }
+
         public float RequestsTotal
         {
             get { return requestsTotal; }
@@ -79,6 +93,12 @@ namespace PCIPT.Windows.Simulation.Observables
         {
             get { return requestsDonePersentage; }
             set { requestsDonePersentage = value; OnPropertyChanged(nameof(RequestsDonePersentage)); }
+        }
+
+        public float RequestsDoneInTimePersentage
+        {
+            get { return requestsDoneInTimePersentage; }
+            set { requestsDoneInTimePersentage = value; OnPropertyChanged(nameof(RequestsDoneInTimePersentage)); }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

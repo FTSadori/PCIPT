@@ -14,6 +14,7 @@ namespace PCIPT.Windows.Simulation.Observables
         private string destination = "";
         private float cargoTransported;
         private float persentageDone;
+        private float delay = 0;
         private string cargoName = "";
 
         public int Id
@@ -44,6 +45,12 @@ namespace PCIPT.Windows.Simulation.Observables
         {
             get { return cargoTransported; }
             set { cargoTransported = value; OnPropertyChanged(nameof(CargoTransported)); }
+        }
+
+        public float Delay
+        {
+            get { return delay; }
+            set { delay = value; OnPropertyChanged(nameof(Delay)); }
         }
 
         public float PersentageDone

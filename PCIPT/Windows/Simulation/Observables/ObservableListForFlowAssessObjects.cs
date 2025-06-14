@@ -41,5 +41,17 @@ namespace PCIPT.Windows.Simulation.Observables
                 ObservableFlows[i].PersentageDone = MathF.Round(ObservableFlows[i].CargoTransported / (float)pointObjects[i].allDailyCargo * 100, 2);
             }
         }
+
+        public static void UpdateDelay(List<PointObject> pointObjects, float timePassed)
+        {
+            for (int i = 0; i < ObservableFlows.Count; ++i)
+            {
+                var po = ToObservablePointsListTranslator.cargoTurnoverPointDtos.Find(p => p.Id == pointObjects[i].pointId);
+                if (ObservableFlows[i].PersentageDone < 0.999 && timePassed > po.DeliveryTime)
+                {
+                    ObservableFlows[i].Delay = timePassed - po.DeliveryTime;
+                }
+            }
+        }
     }
 }

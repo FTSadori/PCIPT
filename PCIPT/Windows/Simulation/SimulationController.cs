@@ -54,7 +54,7 @@ namespace PCIPT.Windows.Simulation
 
                 var cargo = cargoDtos.Where(c => c.Code == dto.CargoCode).First();
 
-                pointObjects.Add(new PointObject(dto.Id, dto.OutgoingCargo, dto.OutgoingCargo, dto.OutgoingCargo, sour.Width, sour.Height, dest.Width, dest.Height, cargo.Type, cargo.CapacityUtilisationRate, RouteCalculator.GetDistanceBetween(dto.SourceId, dto.DestinationId), dto.SourceId, dto.DestinationId));
+                pointObjects.Add(new PointObject(dto.Id, dto.OutgoingCargo, dto.OutgoingCargo, dto.OutgoingCargo, sour.Width, sour.Height, dest.Width, dest.Height, cargo.Type, cargo.CapacityUtilisationRate, RouteCalculator.GetDistanceBetween(dto.SourceId, dto.DestinationId), dto.SourceId, dto.DestinationId, dto.DeliveryTime));
             }
 
             foreach (var line in plan)
@@ -105,6 +105,7 @@ namespace PCIPT.Windows.Simulation
             ToObservablePointsListTranslator.UpdateList(pointObjects);
             ObservableListForFlowAssessObjects.UpdateList(pointObjects);
             ObservableListForCargoAssessObjects.UpdateList(pointObjects);
+            ObservableListForFlowAssessObjects.UpdateDelay(pointObjects, (float)totalTime);
         }
 
         public void StepForVehicle(int id, StreamWriter sw, VehicleObject vehicle, double time, double deltaSeconds)
@@ -266,7 +267,7 @@ namespace PCIPT.Windows.Simulation
                     return deltaSeconds;
                 }
 
-                ObservableListForVehicleAssessObject.DoneRequest(id, 1);
+                ObservableListForVehicleAssessObject.DoneRequest(id, 1, (float)totalTime, (float)po.dueTime);
                 ChangeState(vehicle, sw, VehicleState.AWAITS);
                 return deltaSeconds;
             }

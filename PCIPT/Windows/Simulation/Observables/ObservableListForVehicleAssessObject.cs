@@ -52,10 +52,19 @@ namespace PCIPT.Windows.Simulation.Observables
             ObservableVehicleAssesses[id].RequestsDonePersentage = (ObservableVehicleAssesses[id].RequestsTotal == 0) ? 100 : MathF.Round(ObservableVehicleAssesses[id].RequestsDone / ObservableVehicleAssesses[id].RequestsTotal * 100, 2);
         }
 
-        public static void DoneRequest(int id, int requestNumber)
+        public static void DoneRequest(int id, int requestNumber, float totalTimePassed, float flowTime)
         {
             ObservableVehicleAssesses[id].RequestsDone += requestNumber;
             ObservableVehicleAssesses[id].RequestsDonePersentage = (ObservableVehicleAssesses[id].RequestsTotal == 0) ? 100 : MathF.Round(ObservableVehicleAssesses[id].RequestsDone / ObservableVehicleAssesses[id].RequestsTotal * 100, 2);
+            if (totalTimePassed <= flowTime)
+            {
+                ObservableVehicleAssesses[id].RequestsDoneInTime += requestNumber;
+            }
+            else
+            {
+                ObservableVehicleAssesses[id].TotalDelay += totalTimePassed - flowTime;
+            }
+            ObservableVehicleAssesses[id].RequestsDoneInTimePersentage = (ObservableVehicleAssesses[id].RequestsTotal == 0) ? 100 : MathF.Round(ObservableVehicleAssesses[id].RequestsDoneInTime / ObservableVehicleAssesses[id].RequestsTotal * 100, 2);
         }
 
         public static void AddCargo(int id, float cargo)

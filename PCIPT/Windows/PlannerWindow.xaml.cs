@@ -141,21 +141,21 @@ namespace PCIPT.Windows
         {
             PlanText.Text = "";
 
-            PlanText.Text += "Необхідна техніка:\n";
+            PlanText.Text += "Required vehicles:\n";
             foreach (var costLine in finalCost)
             {
                 if (costLine.UsedNumber > 0)
                 {
                     if (costLine.Name == "Total")
                     {
-                        PlanText.Text += $"  Загалом: {costLine.UsedNumber} шт.\n";
+                        PlanText.Text += $"  Total: {costLine.UsedNumber}.\n";
                     }
                     else
-                        PlanText.Text += $"- {costLine.Name} ({costLine.UsedNumber} шт.)\n";
+                        PlanText.Text += $"- {costLine.Name} ({costLine.UsedNumber})\n";
                 }
             }
 
-            PlanText.Text += "\nВантажопотоки:\n";
+            PlanText.Text += "\nCargo flows:\n";
             double totalDaily = 0;
             double totalMonthly = 0;
             double total = 0;
@@ -165,31 +165,31 @@ namespace PCIPT.Windows
                 var dest = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.DestinationId);
                 var cargo = PlannerImportWindow.cargoDtos.Find(n => n.Code == point.CargoCode);
 
-                PlanText.Text += $"- Потік \"{source.Name.Replace('/', ' ')}->{dest.Name.Replace('/', ' ')}\" ({cargo.Name}):\n";
+                PlanText.Text += $"- Flow \"{source.Name.Replace('/', ' ')}->{dest.Name.Replace('/', ' ')}\" ({cargo.Name}):\n";
                 var daily = point.OutgoingCargo / PlannerImportWindow.workingDays;
                 if (PlannerImportWindow.workingDays >= 30)
                 {
-                    PlanText.Text += $"  Обсяг:  \t{daily / PlannerImportWindow.workShifts:0}\t{daily:0}\t{daily * 30:0}\t{point.OutgoingCargo:0} (т)\n";
+                    PlanText.Text += $"  Volume:  \t{daily / PlannerImportWindow.workShifts:0}\t{daily:0}\t{daily * 30:0}\t{point.OutgoingCargo:0} (t)\n";
                     totalMonthly += daily * 30;
                 }
                 else
                 {
-                    PlanText.Text += $"  Обсяг:  \t{daily / PlannerImportWindow.workShifts:0}\t{daily:0}\t-\t{point.OutgoingCargo:0} (т)\n";
+                    PlanText.Text += $"  Volume:  \t{daily / PlannerImportWindow.workShifts:0}\t{daily:0}\t-\t{point.OutgoingCargo:0} (t)\n";
                 }
                 totalDaily += daily;
                 total += point.OutgoingCargo;
             }
-            PlanText.Text += $"  Загалом:\t{totalDaily / PlannerImportWindow.workShifts:0}\t{totalDaily:0}\t{totalMonthly:0}\t{total:0} (т)\n";
+            PlanText.Text += $"  Total:\t{totalDaily / PlannerImportWindow.workShifts:0}\t{totalDaily:0}\t{totalMonthly:0}\t{total:0} (t)\n";
 
-            PlanText.Text += "\nВитрати:\n";
+            PlanText.Text += "\nCosts:\n";
             var totalLine = finalCost.Find(c => c.Name == "Total");
-            PlanText.Text += $"- Витрати на електрику: {totalLine.BaseElectricityConsumption * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
-            PlanText.Text += $"- Витрати на паливо: {totalLine.FuelConsumption * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
-            PlanText.Text += $"- Витрати на ремонти: {totalLine.RepairCosts * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
-            PlanText.Text += $"- Витрати на оливи: {(totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
-            PlanText.Text += $"  Загалом: {(totalLine.BaseElectricityConsumption + totalLine.FuelConsumption + totalLine.RepairCosts + totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Electricity costs: {totalLine.BaseElectricityConsumption * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Fuel costs: {totalLine.FuelConsumption * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Repair costs: {totalLine.RepairCosts * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"- Olive oil costs: {(totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
+            PlanText.Text += $"  Total: {(totalLine.BaseElectricityConsumption + totalLine.FuelConsumption + totalLine.RepairCosts + totalLine.HydraulicOilConsumption + totalLine.TransmissionOilConsumption + totalLine.MotorOilConsumption) * PlannerImportWindow.workingDays * PlannerImportWindow.workShifts:0.00} грн\n";
 
-            PlanText.Text += "\nЩозмінний план перевезень:\n";
+            PlanText.Text += "\nShift transport plan:\n";
             var spareList = distributedTasks.ToList();
             spareList.Sort((a, b) => $"{a.Name}[{a.Number}]".CompareTo($"{b.Name}[{b.Number}]"));
             string lastVehicle = "";
@@ -213,14 +213,14 @@ namespace PCIPT.Windows
                 var source = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.SourceId);
                 if (iterator == 0)
                 {
-                    PlanText.Text += $"{iterator++}. Знаходиться початково в пункті \"{source.Name.Replace('/', ' ')}\" (id {source.Id})\n";
+                    PlanText.Text += $"{iterator++}. Located initially at point \"{source.Name.Replace('/', ' ')}\" (id {source.Id})\n";
                 }
                 var dest = PlannerImportWindow.nodeDtos.Find(n => n.Id == point.DestinationId);
                 var cargo = PlannerImportWindow.cargoDtos.Find(n => n.Code == task.CargoCode);
                 var veh = PlannerImportWindow.vehicleDtos.Find(n => n.Name == task.Name);
 
-                PlanText.Text += $"{iterator++}. Виконує перевезення на потоці \"{source.Name.Replace('/', ' ')}->{dest.Name.Replace('/', ' ')}\" ({cargo.Name})\n";
-                PlanText.Text += $"\tМає виконати {task.NumberOfCycles} циклів перевезень по {veh.LoadCapacity * cargo.CapacityUtilisationRate:0.00} т вантажу.\n\tЗагалом до {veh.LoadCapacity * cargo.CapacityUtilisationRate * task.NumberOfCycles:0.00} т вантажу.\n";
+                PlanText.Text += $"{iterator++}. Performs transportation on the flow \"{source.Name.Replace('/', ' ')}->{dest.Name.Replace('/', ' ')}\" ({cargo.Name})\n";
+                PlanText.Text += $"\tMust perform {task.NumberOfCycles} transport cycles, each carrying {veh.LoadCapacity * cargo.CapacityUtilisationRate:0.00} t of cargo.\n\tTotal {veh.LoadCapacity * cargo.CapacityUtilisationRate * task.NumberOfCycles:0.00} t of cargo.\n";
             }
         }
 

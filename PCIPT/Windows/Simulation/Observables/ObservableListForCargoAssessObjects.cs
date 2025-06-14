@@ -17,6 +17,7 @@ namespace PCIPT.Windows.Simulation.Observables
         {
             if (ObservableCargoes.Count == 0)
             {
+                maxCargoes.Clear();
                 foreach (var cargoDto in ToObservablePointsListTranslator.cargoDtos)
                 {
                     var fullCargo = ToObservablePointsListTranslator.cargoTurnoverPointDtos.Where(p => p.CargoCode == cargoDto.Code).Sum(p => p.OutgoingCargo);
